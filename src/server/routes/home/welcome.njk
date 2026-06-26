@@ -1,0 +1,42 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">{{ heading }}</h1>
+
+      <p class="govuk-body-l">
+        Use this service to support livestock keepers, owners, agents, and delegates across the livestock platform.
+      </p>
+
+      <p class="govuk-body">
+        Sign in with your internal SSO account when you are on the Defra estate. If you are working remotely or outside the estate, you can use the Defra CI fallback sign-in.
+      </p>
+
+      {{ govukButton({
+        text: "Sign in with SSO",
+        href: primaryLoginUrl,
+        isStartButton: true
+      }) }}
+
+      <p class="govuk-body">
+        Outside the Defra estate?
+        <a class="govuk-link" href="{{ fallbackLoginUrl }}">Use the Defra CI fallback sign-in</a>.
+      </p>
+
+      <h2 class="govuk-heading-m">What you can do here</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>review animal lifecycle status across supported species</li>
+        <li>open operational modules for casework and support journeys</li>
+        <li>use the broader back-office app set where your permissions allow it</li>
+      </ul>
+
+      <h2 class="govuk-heading-m">Supported species</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for species in supportedSpecies %}
+          <li>{{ species.label }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

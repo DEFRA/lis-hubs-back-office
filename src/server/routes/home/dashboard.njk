@@ -1,0 +1,48 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <span class="govuk-caption-xl">Livestock back office</span>
+      <h1 class="govuk-heading-l">{{ authenticatedUser.firstName }} {{ authenticatedUser.lastName }}</h1>
+      <p class="govuk-body">
+        Internal support and operational workspace.
+      </p>
+      <p class="govuk-body">
+        <a class="govuk-link" href="{{ logoutUrl }}">Sign out</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h2 class="govuk-heading-m">Livestock status summaries</h2>
+      {% for spoke in statusSpokes %}
+        <h3 class="govuk-heading-s">{{ spoke.species.label }} summary</h3>
+        {% if spoke.status.ok %}
+          {{ spoke.status.value | safe }}
+        {% else %}
+          {{ govukWarningText({
+            text: spoke.status.value,
+            iconFallbackText: "Warning"
+          }) }}
+        {% endif %}
+      {% else %}
+        <p class="govuk-body">No status summaries are currently available.</p>
+      {% endfor %}
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <h2 class="govuk-heading-m">Operational modules</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for module in operationalModules %}
+          <li>
+            <a href="{{ module.url }}" class="govuk-link">{{ module.taxonomy.label }} for {{ module.species.label }}</a>
+          </li>
+        {% else %}
+          <li>No operational modules are currently available.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

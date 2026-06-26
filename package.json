@@ -1,0 +1,39 @@
+{
+  "name": "@livestock/hub-back-office",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Back-office hub application for the livestock platform.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "build:frontend": "vite build",
+    "predev": "npm run build:frontend",
+    "dev": "AWS_EMF_ENVIRONMENT=Local node .",
+    "prestart": "npm run build:frontend",
+    "start": "NODE_ENV=production node ."
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@hapi/inert": "7.1.0",
+    "@hapi/hapi": "21.4.8",
+    "@hapi/scooter": "8.0.0",
+    "@livestock/hub-access": "file:../hub-access",
+    "@livestock/hub-core": "file:../hub-core",
+    "@livestock/hub-registry": "file:../hub-registry",
+    "@livestock/infrastructure": "file:../../infrastructure",
+    "blankie": "5.0.0",
+    "convict": "6.2.5",
+    "convict-format-with-validator": "6.2.0",
+    "govuk-frontend": "6.1.0"
+  },
+  "devDependencies": {
+    "sass-embedded": "1.99.0",
+    "vite": "8.0.8",
+    "vitest": "4.1.4"
+  }
+}
