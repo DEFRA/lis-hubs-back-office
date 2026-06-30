@@ -40,7 +40,9 @@ describe('#backOfficeServer', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.headers['content-security-policy']).toContain("default-src 'self'")
+    expect(response.headers['content-security-policy']).toContain(
+      "default-src 'self'"
+    )
   })
 
   test('Should render the back-office welcome page', async () => {

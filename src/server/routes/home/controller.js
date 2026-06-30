@@ -1,8 +1,12 @@
 import { getHubAuthSession } from '@livestock/hub-core/auth/session'
 import { getAccessibleModulesForHub } from '@livestock/hub-access'
-import { hydrateModuleMetadata, MODULES, SPECIES } from '@livestock/hub-registry'
-import { createSpokeAuthToken } from '@livestock/infrastructure/auth'
-import { getLoggerForConfig } from '@livestock/infrastructure/logging'
+import {
+  hydrateModuleMetadata,
+  MODULES,
+  SPECIES
+} from '@livestock/hub-registry'
+import { createSpokeAuthToken } from '@livestock/ui-services/auth'
+import { getLoggerForConfig } from '@livestock/ui-services/logging'
 
 import { config } from '#config/config.js'
 
@@ -60,7 +64,9 @@ function buildHomeViewModel(request) {
     logoutUrl: '/auth/logout',
     modules,
     statusSpokes: modules.filter((module) => module.taxonomy.id === 'status'),
-    operationalModules: modules.filter((module) => module.taxonomy.id !== 'status')
+    operationalModules: modules.filter(
+      (module) => module.taxonomy.id !== 'status'
+    )
   }
 }
 

@@ -1,5 +1,5 @@
 import hapi from '@hapi/hapi'
-import { verifyHubJwt } from '@livestock/infrastructure/auth'
+import { verifyHubJwt } from '@livestock/ui-services/auth'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const {
@@ -24,8 +24,8 @@ const { clearHubAuthSession } = vi.hoisted(() => ({
   clearHubAuthSession: vi.fn()
 }))
 
-vi.mock('@livestock/infrastructure', async () => {
-  const actual = await vi.importActual('@livestock/infrastructure')
+vi.mock('@livestock/ui-services', async () => {
+  const actual = await vi.importActual('@livestock/ui-services')
 
   return {
     ...actual,
@@ -76,9 +76,8 @@ function createConfigValueMap() {
 }
 
 function extractCookieValue(setCookieHeader, cookieName) {
-  const cookieHeader = (Array.isArray(setCookieHeader)
-    ? setCookieHeader
-    : [setCookieHeader]
+  const cookieHeader = (
+    Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader]
   ).find((value) => value.startsWith(`${cookieName}=`))
 
   if (!cookieHeader) {
@@ -189,8 +188,8 @@ describe('#backOfficeAuthRoutes', () => {
       authenticatedAt: '2026-05-15T10:00:00.000Z'
     }
     const profile = {
-      groups: ['move'],
-      permissions: ['move.read', 'move.write'],
+      roles: ['lis-role-back-office-caseworker'],
+      permissions: ['lis-perm-back-office', 'lis-perm-cattle-write'],
       holdings: ['holding-1']
     }
 
@@ -226,6 +225,6 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(payload.sub).toBe(user.sub)
     expect(payload.permissions).toEqual(profile.permissions)
-    expect(payload.roles).toEqual(user.roles)
+    expect(payload.roles).toEqual(profile.roles)
   })
 })

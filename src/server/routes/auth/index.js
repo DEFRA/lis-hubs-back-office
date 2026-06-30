@@ -2,7 +2,7 @@ import {
   createHubAuthPlugin,
   createHubCookieOptions
 } from '@livestock/hub-core/auth/plugin'
-import { createProfileService } from '@livestock/infrastructure'
+import { createProfileService } from '@livestock/ui-services'
 
 import { config } from '#config/config.js'
 import {

@@ -66,8 +66,8 @@ vi.mock('@livestock/hub-registry', () => ({
   }))
 }))
 
-vi.mock('@livestock/infrastructure/auth', async () => {
-  const actual = await vi.importActual('@livestock/infrastructure/auth')
+vi.mock('@livestock/ui-services/auth', async () => {
+  const actual = await vi.importActual('@livestock/ui-services/auth')
 
   return {
     ...actual,
@@ -75,8 +75,8 @@ vi.mock('@livestock/infrastructure/auth', async () => {
   }
 })
 
-vi.mock('@livestock/infrastructure/logging', async () => {
-  const actual = await vi.importActual('@livestock/infrastructure/logging')
+vi.mock('@livestock/ui-services/logging', async () => {
+  const actual = await vi.importActual('@livestock/ui-services/logging')
 
   return {
     ...actual,

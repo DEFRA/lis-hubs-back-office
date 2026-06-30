@@ -14,7 +14,7 @@ Expected dependencies:
 - `@livestock/hub-core`
 - `@livestock/hub-registry`
 - `@livestock/hub-access`
-- `@livestock/infrastructure`
+- `@livestock/ui-services`
 
 Current state:
 

@@ -1,4 +1,4 @@
-import { statusCodes } from '@livestock/infrastructure/status-codes'
+import { statusCodes } from '@livestock/ui-services/status-codes'
 
 export const healthController = {
   handler(_request, h) {
