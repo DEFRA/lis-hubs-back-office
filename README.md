@@ -13,7 +13,7 @@ Expected dependencies:
 
 - `@livestock/hub-core`
 - `@livestock/hub-registry`
-- `@livestock/hub-access`
+- `@livestock/ui-services`
 - `@livestock/ui-services`
 
 Current state:
@@ -25,7 +25,7 @@ Current state:
 - content security policy is now owned by the back-office server shell
 - shared module metadata comes from `@livestock/hub-registry`
 - shared session access comes from `@livestock/hub-core`
-- shared access filtering comes from `@livestock/hub-access`
+- shared access filtering comes from `@livestock/ui-services`
 - back-office authentication is wired through the shared hub auth mechanics
 
 Remaining work:

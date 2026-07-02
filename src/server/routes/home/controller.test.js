@@ -47,7 +47,7 @@ vi.mock('@livestock/hub-core/auth/session', () => ({
   getHubAuthSession
 }))
 
-vi.mock('@livestock/hub-access', () => ({
+vi.mock('@livestock/ui-services/module-access', () => ({
   getAccessibleModulesForHub
 }))
 
@@ -66,23 +66,13 @@ vi.mock('@livestock/hub-registry', () => ({
   }))
 }))
 
-vi.mock('@livestock/ui-services/auth', async () => {
-  const actual = await vi.importActual('@livestock/ui-services/auth')
+vi.mock('@livestock/ui-services/auth', () => ({
+  createSpokeAuthToken
+}))
 
-  return {
-    ...actual,
-    createSpokeAuthToken
-  }
-})
-
-vi.mock('@livestock/ui-services/logging', async () => {
-  const actual = await vi.importActual('@livestock/ui-services/logging')
-
-  return {
-    ...actual,
-    getLoggerForConfig: vi.fn(() => logger)
-  }
-})
+vi.mock('@livestock/ui-services/logging', () => ({
+  getLoggerForConfig: vi.fn(() => logger)
+}))
 
 vi.mock('#config/config.js', () => ({
   config: {
