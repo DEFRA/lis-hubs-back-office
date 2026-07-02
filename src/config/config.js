@@ -200,7 +200,8 @@ export const config = convict({
     url: {
       doc: 'Profile service endpoint used to enrich hub auth sessions',
       format: String,
-      default: 'http://localhost:4000/api/profile',
+      nullable: true,
+      default: null,
       env: 'PROFILE_SERVICE_URL'
     },
     apiKey: {
