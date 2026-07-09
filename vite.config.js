@@ -6,9 +6,23 @@ import { NodePackageImporter } from 'sass-embedded'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const assetBasePath = '/public'
 
+function stripSlashes(value) {
+  let start = 0
+  while (value.indexOf('/', start) === start) {
+    start += 1
+  }
+
+  let end = value.length
+  while (value.lastIndexOf('/', end - 1) === end - 1) {
+    end -= 1
+  }
+
+  return value.slice(start, end)
+}
+
 function resolveViteBase(basePath = '') {
   const normalizedBasePath =
-    basePath && basePath !== '/' ? `/${basePath.replace(/^\/+|\/+$/g, '')}` : ''
+    basePath && basePath !== '/' ? `/${stripSlashes(basePath)}` : ''
 
   return `${normalizedBasePath}${assetBasePath}`
 }

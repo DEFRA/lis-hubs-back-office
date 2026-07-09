@@ -11,7 +11,8 @@
     "dev": "AWS_EMF_ENVIRONMENT=Local node .",
     "docker:dev": "npm run dev",
     "prestart": "npm run build:frontend",
-    "start": "NODE_ENV=production node ."
+    "start": "NODE_ENV=production node .",
+    "lint": "eslint ."
   },
   "imports": {
     "#*": "./src/*"
@@ -32,6 +33,8 @@
     "govuk-frontend": "6.1.0"
   },
   "devDependencies": {
+    "@defra/lis-infra-eslint-config": "0.0.1",
+    "eslint": "^9.0.0",
     "sass-embedded": "1.99.0",
     "vite": "8.0.8",
     "vitest": "4.1.4"
