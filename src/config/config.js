@@ -4,9 +4,10 @@ import { fileURLToPath } from 'node:url'
 
 import convictFormatWithValidator from 'convict-format-with-validator'
 
+import { milliseconds } from '@livestock/ui-services/duration'
+
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const fourHoursMs = 14400000
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 const isDevelopment = process.env.NODE_ENV === 'development'
@@ -58,7 +59,7 @@ export const config = convict({
   staticCacheTimeout: {
     doc: 'Cache timeout for static assets in milliseconds',
     format: Number,
-    default: 24 * 60 * 60 * 1000,
+    default: milliseconds.oneDay,
     env: 'STATIC_CACHE_TIMEOUT'
   },
   isProduction: {
@@ -119,7 +120,7 @@ export const config = convict({
       ttl: {
         doc: 'Server-side session cache ttl',
         format: Number,
-        default: fourHoursMs,
+        default: milliseconds.fourHours,
         env: 'SESSION_CACHE_TTL'
       }
     },
@@ -127,7 +128,7 @@ export const config = convict({
       ttl: {
         doc: 'Session cookie ttl',
         format: Number,
-        default: fourHoursMs,
+        default: milliseconds.fourHours,
         env: 'SESSION_COOKIE_TTL'
       },
       password: {
