@@ -1,7 +1,13 @@
-import { getHubAuthSession } from '@livestock/infra-core/auth/session'
-import { getAccessibleModulesForHub } from '@livestock/ui-services/module-access'
-import { hydrateModuleMetadata, MODULES, SPECIES } from '@livestock/hub-registry'
-import { createSpokeAuthToken } from '@livestock/ui-services/auth'
+import {
+  createSpokeAuthToken,
+  getHubAuthSession
+} from '@livestock/hubs-infra-access/auth'
+import { getAccessibleModulesForHub } from '@livestock/hubs-infra-access'
+import {
+  hydrateModuleMetadata,
+  MODULES,
+  SPECIES
+} from '@livestock/hubs-infra-registry'
 import { getLoggerForConfig } from '@livestock/ui-services/logging'
 
 import { config } from '#config/config.js'
@@ -25,8 +31,7 @@ export const homeController = {
       pageTitle: 'Welcome',
       heading: 'Livestock back office',
       supportedSpecies: SPECIES,
-      primaryLoginUrl: '/auth/login?returnUrl=/',
-      fallbackLoginUrl: '/auth/login/fallback?returnUrl=/'
+      loginUrl: '/auth/login?returnUrl=/'
     })
   }
 }

@@ -152,6 +152,12 @@ export const config = convict({
       default: '127.0.0.1',
       env: 'REDIS_HOST'
     },
+    port: {
+      doc: 'Redis cache port',
+      format: 'port',
+      default: 6379,
+      env: 'REDIS_PORT'
+    },
     username: {
       doc: 'Redis cache username',
       format: String,
@@ -226,16 +232,10 @@ export const config = convict({
       env: 'HUB_ORIGIN'
     },
     primaryProvider: {
-      doc: 'Primary authentication provider for back-office',
+      doc: 'Authentication provider for back-office',
       format: String,
-      default: 'sso',
+      default: 'entra',
       env: 'AUTH_PRIMARY_PROVIDER'
-    },
-    fallbackProvider: {
-      doc: 'Fallback authentication provider for back-office',
-      format: String,
-      default: 'defra-ci',
-      env: 'AUTH_FALLBACK_PROVIDER'
     },
     hubJwt: {
       cookieName: {
@@ -271,74 +271,39 @@ export const config = convict({
       }
     },
     providers: {
-      sso: {
+      entra: {
         discoveryUrl: {
           doc: 'OIDC discovery URL for the primary SSO provider',
           format: String,
           nullable: true,
           default: null,
-          env: 'SSO_OIDC_DISCOVERY_URL'
+          env: 'OIDC_DISCOVERY_URL'
         },
         clientId: {
           doc: 'OIDC client id for the primary SSO provider',
           format: String,
-          default: 'back-office-sso-client',
-          env: 'SSO_OIDC_CLIENT_ID'
+          default: 'back-office-entra-client',
+          env: 'OIDC_CLIENT_ID'
         },
         clientSecret: {
           doc: 'OIDC client secret for the primary SSO provider',
           format: String,
-          default: 'back-office-sso-secret',
-          env: 'SSO_OIDC_CLIENT_SECRET',
+          default: 'back-office-entra-secret',
+          env: 'OIDC_CLIENT_SECRET',
           sensitive: true
         },
         redirectPath: {
           doc: 'OIDC callback path for the primary SSO provider',
           format: String,
           default: '/sso',
-          env: 'SSO_OIDC_REDIRECT_PATH'
+          env: 'OIDC_REDIRECT_PATH'
         },
         serviceId: {
           doc: 'Optional service id for the primary SSO provider',
           format: String,
           nullable: true,
           default: null,
-          env: 'SSO_OIDC_SERVICE_ID'
-        }
-      },
-      'defra-ci': {
-        discoveryUrl: {
-          doc: 'OIDC discovery URL for the Defra CI fallback provider',
-          format: String,
-          nullable: true,
-          default: null,
-          env: 'DEFRA_CI_OIDC_DISCOVERY_URL'
-        },
-        clientId: {
-          doc: 'OIDC client id for the Defra CI fallback provider',
-          format: String,
-          default: 'back-office-defra-ci-client',
-          env: 'DEFRA_CI_OIDC_CLIENT_ID'
-        },
-        clientSecret: {
-          doc: 'OIDC client secret for the Defra CI fallback provider',
-          format: String,
-          default: 'back-office-defra-ci-secret',
-          env: 'DEFRA_CI_OIDC_CLIENT_SECRET',
-          sensitive: true
-        },
-        redirectPath: {
-          doc: 'OIDC callback path for the Defra CI fallback provider',
-          format: String,
-          default: '/sso',
-          env: 'DEFRA_CI_OIDC_REDIRECT_PATH'
-        },
-        serviceId: {
-          doc: 'Optional service id for the Defra CI fallback provider',
-          format: String,
-          nullable: true,
-          default: null,
-          env: 'DEFRA_CI_OIDC_SERVICE_ID'
+          env: 'OIDC_SERVICE_ID'
         }
       }
     }

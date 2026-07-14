@@ -10,19 +10,14 @@
       </p>
 
       <p class="govuk-body">
-        Sign in with your internal SSO account when you are on the Defra estate. If you are working remotely or outside the estate, you can use the Defra CI fallback sign-in.
+        Sign in with your Microsoft Entra ID account.
       </p>
 
       {{ govukButton({
-        text: "Sign in with SSO",
-        href: primaryLoginUrl,
+        text: "Sign in",
+        href: loginUrl,
         isStartButton: true
       }) }}
-
-      <p class="govuk-body">
-        Outside the Defra estate?
-        <a class="govuk-link" href="{{ fallbackLoginUrl }}">Use the Defra CI fallback sign-in</a>.
-      </p>
 
       <h2 class="govuk-heading-m">What you can do here</h2>
       <ul class="govuk-list govuk-list--bullet">
