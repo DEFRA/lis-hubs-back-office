@@ -43,15 +43,11 @@ const configValues = {
   'auth.hubOrigin': 'http://localhost:3102'
 }
 
-vi.mock('@livestock/infra-core/auth/session', () => ({
-  getHubAuthSession
-}))
-
-vi.mock('@livestock/ui-services/module-access', () => ({
+vi.mock('@livestock/hubs-infra-access', () => ({
   getAccessibleModulesForHub
 }))
 
-vi.mock('@livestock/hub-registry', () => ({
+vi.mock('@livestock/hubs-infra-registry', () => ({
   MODULES: moduleDefinitions,
   SPECIES: [
     {
@@ -66,8 +62,9 @@ vi.mock('@livestock/hub-registry', () => ({
   }))
 }))
 
-vi.mock('@livestock/ui-services/auth', () => ({
-  createSpokeAuthToken
+vi.mock('@livestock/hubs-infra-access/auth', () => ({
+  createSpokeAuthToken,
+  getHubAuthSession
 }))
 
 vi.mock('@livestock/ui-services/logging', () => ({
@@ -107,8 +104,7 @@ describe('#backOfficeHomeController', () => {
       expect.objectContaining({
         pageTitle: 'Welcome',
         heading: 'Livestock back office',
-        primaryLoginUrl: '/auth/login?returnUrl=/',
-        fallbackLoginUrl: '/auth/login/fallback?returnUrl=/'
+        loginUrl: '/auth/login?returnUrl=/'
       })
     )
   })
@@ -139,7 +135,7 @@ describe('#backOfficeHomeController', () => {
     expect(response).toBe('rendered')
     expect(createSpokeAuthToken).toHaveBeenCalledWith(
       expect.objectContaining({
-        spokeId: 'cattle-status',
+        spokeId: 'status-cattle',
         taxonomyId: 'status',
         user: authenticatedUser
       }),

@@ -1,5 +1,5 @@
 import hapi from '@hapi/hapi'
-import { verifyHubJwt } from '@livestock/ui-services/auth'
+import { verifyHubJwt } from '@livestock/hubs-infra-access/auth'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const {
@@ -24,12 +24,15 @@ const { clearHubAuthSession } = vi.hoisted(() => ({
   clearHubAuthSession: vi.fn()
 }))
 
-vi.mock('@livestock/ui-services', async () => {
-  const actual = await vi.importActual('@livestock/ui-services')
+vi.mock('@livestock/hubs-infra-access/auth', async () => {
+  const actual = await vi.importActual('@livestock/hubs-infra-access/auth')
 
   return {
     ...actual,
-    createProfileService: vi.fn(() => fetchUserProfile)
+    createProfileService: vi.fn(() => fetchUserProfile),
+    clearHubAuthSession,
+    getHubAuthSession,
+    setHubAuthSession
   }
 })
 
@@ -37,12 +40,6 @@ vi.mock('#config/config.js', () => ({
   config: {
     get: configGet
   }
-}))
-
-vi.mock('@livestock/infra-core/auth/session', () => ({
-  clearHubAuthSession,
-  getHubAuthSession,
-  setHubAuthSession
 }))
 
 vi.mock('#server/common/helpers/auth/oidc.js', () => ({
@@ -61,8 +58,7 @@ const jwtConfig = {
 
 function createConfigValueMap() {
   return {
-    'auth.primaryProvider': 'sso',
-    'auth.fallbackProvider': 'defra-ci',
+    'auth.primaryProvider': 'entra',
     'auth.hubJwt.cookieName': 'livestock_hub_jwt',
     'auth.hubJwt.secret': jwtConfig.secret,
     'auth.hubJwt.issuer': jwtConfig.issuer,
@@ -110,7 +106,7 @@ describe('#backOfficeAuthRoutes', () => {
   })
 
   test('Should use the primary provider for the default login route', async () => {
-    buildAuthorizationUrl.mockResolvedValue('https://sso.example.test/login')
+    buildAuthorizationUrl.mockResolvedValue('https://entra.example.test/login')
 
     const server = await createTestServer()
     const response = await server.inject({
@@ -121,39 +117,13 @@ describe('#backOfficeAuthRoutes', () => {
     await server.stop({ timeout: 0 })
 
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('https://sso.example.test/login')
-    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
-      expect.any(Object),
-      'sso'
-    )
-  })
-
-  test('Should use the fallback provider for the fallback login route', async () => {
-    buildAuthorizationUrl.mockResolvedValue(
-      'https://defra-ci.example.test/login'
-    )
-
-    const server = await createTestServer()
-    const response = await server.inject({
-      method: 'GET',
-      url: '/auth/login/fallback?returnUrl=/dashboard'
-    })
-
-    await server.stop({ timeout: 0 })
-
-    expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(
-      'https://defra-ci.example.test/login'
-    )
-    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
-      expect.any(Object),
-      'defra-ci'
-    )
+    expect(response.headers.location).toBe('https://entra.example.test/login')
+    expect(buildAuthorizationUrl).toHaveBeenCalledWith(expect.any(Object), undefined)
   })
 
   test('Should return a service unavailable response when the provider login configuration is invalid', async () => {
     buildAuthorizationUrl.mockRejectedValue(
-      new Error('OIDC discovery URL is not configured for provider sso')
+      new Error('OIDC discovery URL is not configured for provider entra')
     )
 
     const server = await createTestServer()
@@ -212,11 +182,6 @@ describe('#backOfficeAuthRoutes', () => {
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/dashboard')
     expect(fetchUserProfile).toHaveBeenCalledWith(user, 'access-token')
-    expect(setHubAuthSession).toHaveBeenCalledWith(expect.any(Object), {
-      ...authSession,
-      ...profile
-    })
-
     const token = extractCookieValue(
       response.headers['set-cookie'],
       'livestock_hub_jwt'

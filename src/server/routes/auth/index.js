@@ -1,8 +1,8 @@
 import {
   createHubAuthPlugin,
-  createHubCookieOptions
-} from '@livestock/infra-core/auth/plugin'
-import { createProfileService } from '@livestock/ui-services'
+  createHubCookieOptions,
+  createProfileService
+} from '@livestock/hubs-infra-access/auth'
 
 import { config } from '#config/config.js'
 import {
@@ -41,14 +41,5 @@ export const auth = createHubAuthPlugin({
   buildAuthorizationUrl,
   completeAuthorizationCodeGrant,
   buildLogoutUrl,
-  loginRoutes: [
-    {
-      path: '/auth/login',
-      providerId: () => config.get('auth.primaryProvider')
-    },
-    {
-      path: '/auth/login/fallback',
-      providerId: () => config.get('auth.fallbackProvider')
-    }
-  ]
+  loginRoutes: [{ path: '/auth/login' }]
 })
