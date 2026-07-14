@@ -1,4 +1,4 @@
-import { createOidcClient } from '@livestock/infra-core/auth/oidc'
+import { createOidcClient } from '@livestock/hubs-infra-access/auth'
 
 import { config } from '#config/config.js'
 
