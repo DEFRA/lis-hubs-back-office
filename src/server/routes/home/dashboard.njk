@@ -4,45 +4,47 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
       <span class="govuk-caption-xl">Livestock back office</span>
-      <h1 class="govuk-heading-l">{{ authenticatedUser.firstName }} {{ authenticatedUser.lastName }}</h1>
-      <p class="govuk-body">
-        Internal support and operational workspace.
-      </p>
-      <p class="govuk-body">
-        <a class="govuk-link" href="{{ logoutUrl }}">Sign out</a>
-      </p>
-    </div>
-  </div>
+      <h1 class="govuk-heading-xl">{{ greeting }}, {{ authenticatedUser.firstName }}</h1>
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <h2 class="govuk-heading-m">Livestock status summaries</h2>
-      {% for spoke in statusSpokes %}
-        <h3 class="govuk-heading-s">{{ spoke.species.label }} summary</h3>
-        {% if spoke.status.ok %}
-          {{ spoke.status.value | safe }}
-        {% else %}
-          {{ govukWarningText({
-            text: spoke.status.value,
-            iconFallbackText: "Warning"
-          }) }}
-        {% endif %}
+      <h2 class="govuk-heading-l">Actions to complete</h2>
+      {% if actionsToComplete.length %}
+        <ul class="govuk-task-list">
+          {% for action in actionsToComplete %}
+            <li class="govuk-task-list__item govuk-task-list__item--with-link">
+              <div class="govuk-task-list__name-and-hint">
+                <a class="govuk-link govuk-task-list__link" href="{{ action.url }}">{{ action.title }}</a>
+                {% if action.description %}<div class="govuk-task-list__hint">{{ action.description }}</div>{% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
       {% else %}
-        <p class="govuk-body">No status summaries are currently available.</p>
-      {% endfor %}
-    </div>
+        <p class="govuk-body">There are no actions to complete.</p>
+      {% endif %}
 
-    <div class="govuk-grid-column-one-third">
-      <h2 class="govuk-heading-m">Operational modules</h2>
-      <ul class="govuk-list govuk-list--bullet">
-        {% for module in operationalModules %}
-          <li>
-            <a href="{{ module.url }}" class="govuk-link">{{ module.taxonomy.label }} for {{ module.species.label }}</a>
-          </li>
-        {% else %}
-          <li>No operational modules are currently available.</li>
-        {% endfor %}
-      </ul>
+      <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+      <h2 class="govuk-heading-l">What do you need to do?</h2>
+
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-half">
+          <h3 class="govuk-heading-m">Find and browse CPHs</h3>
+          <ul class="govuk-list govuk-list--spaced">
+            <li><a class="govuk-link" href="/cphs?searchBy=address">Find a CPH by address</a></li>
+            <li><a class="govuk-link" href="/cphs?searchBy=person">Find a CPH by person name</a></li>
+            <li><a class="govuk-link" href="/cphs?searchBy=browse">Browse CPHs</a></li>
+          </ul>
+        </div>
+        <div class="govuk-grid-column-one-half">
+          <h3 class="govuk-heading-m">Find users</h3>
+          <ul class="govuk-list govuk-list--spaced">
+            <li><a class="govuk-link" href="/users?searchBy=email">Find a user by email</a></li>
+            <li><a class="govuk-link" href="/users?searchBy=address">Find a user by address</a></li>
+            <li><a class="govuk-link" href="/users?searchBy=cph">Find a user by CPH</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="govuk-body govuk-!-margin-top-8"><a class="govuk-link" href="{{ logoutUrl }}">Sign out</a></p>
     </div>
   </div>
 {% endblock %}

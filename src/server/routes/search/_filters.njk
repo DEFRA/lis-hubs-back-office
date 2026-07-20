@@ -1,0 +1,17 @@
+<form method="get" novalidate>
+  <input type="hidden" name="searchBy" value="{{ searchBy }}">
+  <input type="hidden" name="apply" value="1">
+  {% if searchType.fields.length %}
+    <div class="govuk-grid-row">
+      {% for field in searchType.fields %}
+        <div class="govuk-grid-column-one-half">
+          <div class="govuk-form-group">
+            <label class="govuk-label govuk-label--s" for="{{ field.name }}">{{ field.label }}</label>
+            <input class="govuk-input{% if field.width %} govuk-input--width-{{ field.width }}{% endif %}" id="{{ field.name }}" name="{{ field.name }}" type="text" value="{{ filters[field.name] }}">
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <button class="govuk-button" data-module="govuk-button" type="submit">Apply</button>
+</form>

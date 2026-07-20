@@ -7,7 +7,6 @@ const {
   buildLogoutUrl,
   completeAuthorizationCodeGrant,
   configGet,
-  fetchUserProfile,
   getHubAuthSession,
   setHubAuthSession
 } = vi.hoisted(() => ({
@@ -15,7 +14,6 @@ const {
   buildLogoutUrl: vi.fn(),
   completeAuthorizationCodeGrant: vi.fn(),
   configGet: vi.fn(),
-  fetchUserProfile: vi.fn(),
   getHubAuthSession: vi.fn(),
   setHubAuthSession: vi.fn()
 }))
@@ -29,7 +27,6 @@ vi.mock('@livestock/hubs-infra-access/auth', async () => {
 
   return {
     ...actual,
-    createProfileService: vi.fn(() => fetchUserProfile),
     clearHubAuthSession,
     getHubAuthSession,
     setHubAuthSession
@@ -118,7 +115,10 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('https://entra.example.test/login')
-    expect(buildAuthorizationUrl).toHaveBeenCalledWith(expect.any(Object), undefined)
+    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
+      expect.any(Object),
+      undefined
+    )
   })
 
   test('Should return a service unavailable response when the provider login configuration is invalid', async () => {
@@ -140,13 +140,13 @@ describe('#backOfficeAuthRoutes', () => {
     )
   })
 
-  test('Should enrich the callback session with profile permissions before minting the hub JWT', async () => {
+  test('Should translate Entra roles without calling the profile service', async () => {
     const user = {
       sub: 'test-user',
       email: 'test.user@example.com',
       firstName: 'Test',
       lastName: 'User',
-      roles: ['caseworker'],
+      roles: ['bcms_user'],
       serviceId: 'test-service',
       loa: 'substantial',
       amr: ['pwd'],
@@ -157,20 +157,12 @@ describe('#backOfficeAuthRoutes', () => {
       idToken: 'id-token',
       authenticatedAt: '2026-05-15T10:00:00.000Z'
     }
-    const profile = {
-      roles: ['lis-role-back-office-caseworker'],
-      permissions: ['lis-perm-back-office', 'lis-perm-cattle-write'],
-      holdings: ['holding-1']
-    }
-
     completeAuthorizationCodeGrant.mockResolvedValue({
       user,
       authSession,
       accessToken: 'access-token',
       returnUrl: '/dashboard'
     })
-    fetchUserProfile.mockResolvedValue(profile)
-
     const server = await createTestServer()
     const response = await server.inject({
       method: 'GET',
@@ -181,7 +173,6 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/dashboard')
-    expect(fetchUserProfile).toHaveBeenCalledWith(user, 'access-token')
     const token = extractCookieValue(
       response.headers['set-cookie'],
       'livestock_hub_jwt'
@@ -189,7 +180,13 @@ describe('#backOfficeAuthRoutes', () => {
     const payload = await verifyHubJwt(token, jwtConfig)
 
     expect(payload.sub).toBe(user.sub)
-    expect(payload.permissions).toEqual(profile.permissions)
-    expect(payload.roles).toEqual(profile.roles)
+    expect(payload.roles).toEqual([
+      'lis-role-reader',
+      'lis-role-back-office',
+      'lis-role-caseworker',
+      'lis-role-cattle-write'
+    ])
+    expect('permissions' in payload).toBe(false)
+    expect(payload.authzVersion).toBe(1)
   })
 })

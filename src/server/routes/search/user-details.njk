@@ -1,0 +1,12 @@
+{% extends 'layouts/page.njk' %}
+{% block content %}
+  <a href="/users?searchBy=email" class="govuk-back-link">Back to users</a>
+  <h1 class="govuk-heading-xl">User details</h1>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">{{ item.name }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">{{ item.email }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Address</dt><dd class="govuk-summary-list__value">{{ item.address }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Postcode</dt><dd class="govuk-summary-list__value">{{ item.postcode }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">CPHs</dt><dd class="govuk-summary-list__value">{{ item.cphs | join(', ') }}</dd></div>
+  </dl>
+{% endblock %}

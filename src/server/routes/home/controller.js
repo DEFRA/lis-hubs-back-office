@@ -1,120 +1,50 @@
-import {
-  createSpokeAuthToken,
-  getHubAuthSession
-} from '@livestock/hubs-infra-access/auth'
-import { getAccessibleModulesForHub } from '@livestock/hubs-infra-access'
-import {
-  hydrateModuleMetadata,
-  MODULES,
-  SPECIES
-} from '@livestock/hubs-infra-registry'
-import { getLoggerForConfig } from '@livestock/ui-services/logging'
+import { getHubAuthSession } from '@livestock/hubs-infra-access/auth'
+import { SPECIES } from '@livestock/hubs-infra-registry'
 
-import { config } from '#config/config.js'
+import { getActionsToComplete } from '#server/services/actions-to-complete.js'
 
-const currentHubId = 'back-office'
+const afternoonStartsAt = 12
+const eveningStartsAt = 18
 
 export const homeController = {
   async handler(request, h) {
-    const viewModel = buildHomeViewModel(request)
+    const authenticatedUser = getHubAuthSession(request)
 
-    if (viewModel.authenticatedUser) {
-      for (const spoke of viewModel.statusSpokes) {
-        spoke.status = await loadSpokeStatus(spoke, viewModel.authenticatedUser)
-      }
-
-      return h.view('home/dashboard', viewModel)
+    if (!authenticatedUser) {
+      return h.view('home/welcome', {
+        pageTitle: 'Welcome',
+        heading: 'Livestock back office',
+        supportedSpecies: SPECIES,
+        loginUrl: '/auth/login?returnUrl=/'
+      })
     }
 
-    return h.view('home/welcome', {
-      ...viewModel,
-      pageTitle: 'Welcome',
-      heading: 'Livestock back office',
-      supportedSpecies: SPECIES,
-      loginUrl: '/auth/login?returnUrl=/'
+    return h.view('home/dashboard', {
+      pageTitle: 'Dashboard',
+      authenticatedUser,
+      greeting: getGreeting(),
+      actionsToComplete: await getActionsToComplete({
+        user: authenticatedUser
+      }),
+      logoutUrl: '/auth/logout'
     })
   }
 }
 
-function buildHomeViewModel(request) {
-  const authenticatedUser = getHubAuthSession(request)
-  const modules = getAccessibleModulesForHub({
-    hubId: currentHubId,
-    user: authenticatedUser,
-    modules: MODULES
-  }).map((module) => {
-    const hydratedModule = hydrateModuleMetadata(module)
+/**
+ * @param {Date} date
+ * @returns {string}
+ */
+export function getGreeting(date = new Date()) {
+  const hour = date.getHours()
 
-    return {
-      ...hydratedModule,
-      taxonomy: {
-        id: module.taxonomy,
-        label: hydratedModule.taxonomyLabel
-      },
-      species: {
-        id: module.species,
-        label: hydratedModule.speciesLabel
-      },
-      url: module.spokeUrl ?? module.path
-    }
-  })
-
-  return {
-    authenticatedUser,
-    loginUrl: '/auth/login?returnUrl=/',
-    logoutUrl: '/auth/logout',
-    modules,
-    statusSpokes: modules.filter((module) => module.taxonomy.id === 'status'),
-    operationalModules: modules.filter((module) => module.taxonomy.id !== 'status')
-  }
-}
-
-function getSpokeAuthConfig() {
-  return {
-    secret: config.get('auth.hubJwt.secret'),
-    issuer: config.get('auth.hubJwt.issuer'),
-    audience: config.get('auth.hubJwt.audience'),
-    ttlSeconds: config.get('auth.hubJwt.ttlSeconds')
-  }
-}
-
-async function loadSpokeStatus(spoke, authenticatedUser) {
-  const logger = getLoggerForConfig(config)
-  const spokeUrl = buildStatusUrl(spoke)
-  const headers = {
-    Authorization: await createSpokeAuthToken(
-      {
-        taxonomyId: spoke.taxonomy.id,
-        spokeId: spoke.id,
-        user: authenticatedUser
-      },
-      getSpokeAuthConfig()
-    )
-  }
-  const response = await fetch(spokeUrl, {
-    method: 'GET',
-    headers
-  })
-
-  if (!response.ok) {
-    logger.error(
-      `Failed to fetch spoke status for ${spoke.id}: ${response.status} ${response.statusText}`
-    )
-
-    return {
-      ok: false,
-      value: 'Error fetching spoke status, please try again later.'
-    }
+  if (hour < afternoonStartsAt) {
+    return 'Good morning'
   }
 
-  return {
-    ok: true,
-    value: await response.text()
+  if (hour < eveningStartsAt) {
+    return 'Good afternoon'
   }
-}
 
-function buildStatusUrl(spoke) {
-  const spokePath = spoke.path.endsWith('/') ? spoke.path : `${spoke.path}/`
-
-  return new URL(spokePath, config.get('auth.hubOrigin')).toString()
+  return 'Good evening'
 }
