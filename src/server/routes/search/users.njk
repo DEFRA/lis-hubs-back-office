@@ -1,0 +1,37 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <a href="/" class="govuk-back-link">Back to dashboard</a>
+  <h1 class="govuk-heading-xl">{{ heading }}</h1>
+
+  {% include 'search/_filters.njk' %}
+
+  {% if applied %}
+    <h2 class="govuk-heading-l">Results</h2>
+    {% if results.length %}
+      <p class="govuk-body">{{ total }} user{% if total != 1 %}s{% endif %} found</p>
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-visually-hidden">User search results</caption>
+        <thead class="govuk-table__head"><tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Name</th>
+          <th scope="col" class="govuk-table__header">Email address</th>
+          <th scope="col" class="govuk-table__header">Postcode</th>
+          <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Actions</span></th>
+        </tr></thead>
+        <tbody class="govuk-table__body">
+          {% for user in results %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell">{{ user.name }}</td>
+              <td class="govuk-table__cell">{{ user.email }}</td>
+              <td class="govuk-table__cell">{{ user.postcode }}</td>
+              <td class="govuk-table__cell"><a class="govuk-link" href="/users/{{ user.id | urlencode }}">Show details<span class="govuk-visually-hidden"> for {{ user.name }}</span></a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if pagination %}{{ govukPagination(pagination) }}{% endif %}
+    {% else %}
+      <p class="govuk-body">No users found.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

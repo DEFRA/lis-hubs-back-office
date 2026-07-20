@@ -18,6 +18,7 @@ import { serveStaticFiles } from '#server/plugins/serve-static-files.js'
 import { auth } from '#server/routes/auth/index.js'
 import { health } from '#server/routes/health/index.js'
 import { home } from '#server/routes/home/index.js'
+import { search } from '#server/routes/search/index.js'
 
 const logger = getLoggerForConfig(config)
 const requestLogger = getRequestLoggerPluginForConfig(config)
@@ -71,7 +72,8 @@ export async function createServer() {
     serveStaticFiles,
     auth.plugin,
     health.plugin,
-    home.plugin
+    home.plugin,
+    search.plugin
   ])
 
   server.ext('onPreResponse', catchAll)

@@ -1,0 +1,11 @@
+{% extends 'layouts/page.njk' %}
+{% block content %}
+  <a href="/cphs?searchBy=browse" class="govuk-back-link">Back to CPHs</a>
+  <h1 class="govuk-heading-xl">CPH details</h1>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">CPH ID</dt><dd class="govuk-summary-list__value">{{ item.cph }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Farm or company name</dt><dd class="govuk-summary-list__value">{{ item.name }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Address</dt><dd class="govuk-summary-list__value">{{ item.address }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Postcode</dt><dd class="govuk-summary-list__value">{{ item.postcode }}</dd></div>
+  </dl>
+{% endblock %}
