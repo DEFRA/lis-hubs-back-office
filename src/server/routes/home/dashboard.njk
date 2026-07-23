@@ -34,14 +34,16 @@
             <li><a class="govuk-link" href="/cphs?searchBy=browse">Browse CPHs</a></li>
           </ul>
         </div>
-        <div class="govuk-grid-column-one-half">
-          <h3 class="govuk-heading-m">Find users</h3>
-          <ul class="govuk-list govuk-list--spaced">
-            <li><a class="govuk-link" href="/users?searchBy=email">Find a user by email</a></li>
-            <li><a class="govuk-link" href="/users?searchBy=address">Find a user by address</a></li>
-            <li><a class="govuk-link" href="/users?searchBy=cph">Find a user by CPH</a></li>
-          </ul>
-        </div>
+        {% if canFindUsers %}
+          <div class="govuk-grid-column-one-half">
+            <h3 class="govuk-heading-m">Find users</h3>
+            <ul class="govuk-list govuk-list--spaced">
+              <li><a class="govuk-link" href="/users?searchBy=email">Find a user by email</a></li>
+              <li><a class="govuk-link" href="/users?searchBy=address">Find a user by address</a></li>
+              <li><a class="govuk-link" href="/users?searchBy=cph">Find a user by CPH</a></li>
+            </ul>
+          </div>
+        {% endif %}
       </div>
 
       <p class="govuk-body govuk-!-margin-top-8"><a class="govuk-link" href="{{ logoutUrl }}">Sign out</a></p>

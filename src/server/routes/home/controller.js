@@ -1,4 +1,7 @@
-import { getHubAuthSession } from '@livestock/hubs-infra-access/auth'
+import {
+  getHubAuthSession,
+  hasRole
+} from '@livestock/hubs-infra-access/auth'
 import { SPECIES } from '@livestock/hubs-infra-registry'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
@@ -25,6 +28,9 @@ export const homeController = {
       greeting: getGreeting(),
       actionsToComplete: await getActionsToComplete({
         user: authenticatedUser
+      }),
+      canFindUsers: hasRole(authenticatedUser, {
+        role: 'lis-role-caseworker-super'
       }),
       logoutUrl: '/auth/logout'
     })

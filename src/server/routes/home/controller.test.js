@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getActionsToComplete, getHubAuthSession } = vi.hoisted(() => ({
+const { getActionsToComplete, getHubAuthSession, hasRole } = vi.hoisted(() => ({
   getActionsToComplete: vi.fn(),
-  getHubAuthSession: vi.fn()
+  getHubAuthSession: vi.fn(),
+  hasRole: vi.fn()
 }))
 
-vi.mock('@livestock/hubs-infra-access/auth', () => ({ getHubAuthSession }))
+vi.mock('@livestock/hubs-infra-access/auth', () => ({
+  getHubAuthSession,
+  hasRole
+}))
 vi.mock('#server/services/actions-to-complete.js', () => ({
   getActionsToComplete
 }))
@@ -37,6 +41,7 @@ describe('#backOfficeHomeController', () => {
     const view = vi.fn(() => 'rendered')
     getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue(actions)
+    hasRole.mockReturnValue(false)
 
     const response = await homeController.handler({}, { view })
 
@@ -46,7 +51,29 @@ describe('#backOfficeHomeController', () => {
     })
     expect(view).toHaveBeenCalledWith(
       'home/dashboard',
-      expect.objectContaining({ authenticatedUser, actionsToComplete: actions })
+      expect.objectContaining({
+        authenticatedUser,
+        actionsToComplete: actions,
+        canFindUsers: false
+      })
+    )
+    expect(hasRole).toHaveBeenCalledWith(authenticatedUser, {
+      role: 'lis-role-caseworker-super'
+    })
+  })
+
+  test('shows find users to caseworker supervisors', async () => {
+    const authenticatedUser = { sub: 'supervisor-1', firstName: 'Super' }
+    const view = vi.fn(() => 'rendered')
+    getHubAuthSession.mockReturnValue(authenticatedUser)
+    getActionsToComplete.mockResolvedValue([])
+    hasRole.mockReturnValue(true)
+
+    await homeController.handler({}, { view })
+
+    expect(view).toHaveBeenCalledWith(
+      'home/dashboard',
+      expect.objectContaining({ canFindUsers: true })
     )
   })
 
