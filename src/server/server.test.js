@@ -54,4 +54,48 @@ describe('#backOfficeServer', () => {
     expect(response.statusCode).toBe(200)
     expect(response.result).toContain('Livestock back office')
   })
+
+  test('Should render submitted registration review actions', async () => {
+    const result = await server.render('home/dashboard', {
+      pageTitle: 'Dashboard',
+      authenticatedUser: { firstName: 'Caseworker' },
+      greeting: 'Good morning',
+      actionsToComplete: [
+        {
+          title: 'Review cattle registration REG-MNBX1K8F',
+          description:
+            'Submitted for CPH 10/081/1234 · 2 animals · 11 July 2026',
+          url: '/cattle/register/10/081/1234/bundles/REG-MNBX1K8F'
+        }
+      ],
+      logoutUrl: '/auth/logout'
+    })
+
+    expect(result).toContain('Actions to complete')
+    expect(result).toContain('Review cattle registration REG-MNBX1K8F')
+    expect(result).toContain('Submitted for CPH 10/081/1234')
+    expect(result).toContain(
+      'href="/cattle/register/10/081/1234/bundles/REG-MNBX1K8F"'
+    )
+  })
+
+  test.each([
+    ['search/cphs', 'Browse CPHs'],
+    ['search/users', 'Find a user by email']
+  ])('Should render the %s search page', async (view, heading) => {
+    const result = await server.render(view, {
+      pageTitle: heading,
+      heading,
+      searchBy: 'browse',
+      searchType: { fields: [] },
+      filters: {},
+      applied: true,
+      results: [],
+      total: 0,
+      pagination: null
+    })
+
+    expect(result).toContain(heading)
+    expect(result).toContain('method="get"')
+  })
 })

@@ -14,6 +14,7 @@ import {
 function resolveAuthSession({ user }) {
   return resolveAuthorization({
     source: 'entra',
+    // Accept both Entra's BCMS roles and LIS roles from identity adapters.
     sourceRoles: user.roles
   })
 }
