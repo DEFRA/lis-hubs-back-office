@@ -1,7 +1,4 @@
-import {
-  getHubAuthSession,
-  hasRole
-} from '@livestock/hubs-infra-access/auth'
+import { getHubAuthSession, hasRole } from '@livestock/hubs-infra-access/auth'
 import { SPECIES } from '@livestock/hubs-infra-registry'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
@@ -29,8 +26,8 @@ export const homeController = {
       actionsToComplete: await getActionsToComplete({
         user: authenticatedUser
       }),
-      canFindUsers: hasRole(authenticatedUser, {
-        role: 'lis-role-caseworker-super'
+      canApprovePassport: hasRole(authenticatedUser, {
+        role: 'lis-role-passport-approver'
       }),
       logoutUrl: '/auth/logout'
     })

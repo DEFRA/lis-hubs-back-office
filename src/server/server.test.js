@@ -80,6 +80,26 @@ describe('#backOfficeServer', () => {
   })
 
   test.each([
+    [true, true],
+    [false, false]
+  ])(
+    'Should render passport approval only when authorised',
+    async (canApprovePassport, shouldRender) => {
+      const result = await server.render('home/dashboard', {
+        pageTitle: 'Dashboard',
+        authenticatedUser: { firstName: 'Caseworker' },
+        greeting: 'Good morning',
+        actionsToComplete: [],
+        canApprovePassport,
+        logoutUrl: '/auth/logout'
+      })
+
+      expect(result.includes('Approve a passport')).toBe(shouldRender)
+      expect(result.includes('href="/passports/approve"')).toBe(shouldRender)
+    }
+  )
+
+  test.each([
     ['search/cphs', 'Browse CPHs'],
     ['search/users', 'Find a user by email']
   ])('Should render the %s search page', async (view, heading) => {

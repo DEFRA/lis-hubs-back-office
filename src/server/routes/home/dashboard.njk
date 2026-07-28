@@ -34,13 +34,19 @@
             <li><a class="govuk-link" href="/cphs?searchBy=browse">Browse CPHs</a></li>
           </ul>
         </div>
-        {% if canFindUsers %}
+        <div class="govuk-grid-column-one-half">
+          <h3 class="govuk-heading-m">Find users</h3>
+          <ul class="govuk-list govuk-list--spaced">
+            <li><a class="govuk-link" href="/users?searchBy=email">Find a user by email</a></li>
+            <li><a class="govuk-link" href="/users?searchBy=address">Find a user by address</a></li>
+            <li><a class="govuk-link" href="/users?searchBy=cph">Find a user by CPH</a></li>
+          </ul>
+        </div>
+        {% if canApprovePassport %}
           <div class="govuk-grid-column-one-half">
-            <h3 class="govuk-heading-m">Find users</h3>
+            <h3 class="govuk-heading-m">Passports</h3>
             <ul class="govuk-list govuk-list--spaced">
-              <li><a class="govuk-link" href="/users?searchBy=email">Find a user by email</a></li>
-              <li><a class="govuk-link" href="/users?searchBy=address">Find a user by address</a></li>
-              <li><a class="govuk-link" href="/users?searchBy=cph">Find a user by CPH</a></li>
+              <li><a class="govuk-link" href="/passports/approve">Approve a passport</a></li>
             </ul>
           </div>
         {% endif %}

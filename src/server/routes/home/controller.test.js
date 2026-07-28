@@ -54,12 +54,18 @@ describe('#backOfficeHomeController', () => {
       expect.objectContaining({
         authenticatedUser,
         actionsToComplete: actions,
-        canFindUsers: false
+        canFindUsers: false,
+        canApprovePassport: false
       })
     )
-    expect(hasRole).toHaveBeenCalledWith(authenticatedUser, {
-      role: 'lis-role-caseworker-super'
-    })
+    expect(hasRole).toHaveBeenCalledWith(
+      authenticatedUser,
+      expect.objectContaining({ role: 'lis-role-caseworker-super' })
+    )
+    expect(hasRole).toHaveBeenCalledWith(
+      authenticatedUser,
+      expect.objectContaining({ role: 'lis-role-passport-approver' })
+    )
   })
 
   test('shows find users to caseworker supervisors', async () => {
@@ -74,6 +80,26 @@ describe('#backOfficeHomeController', () => {
     expect(view).toHaveBeenCalledWith(
       'home/dashboard',
       expect.objectContaining({ canFindUsers: true })
+    )
+  })
+
+  test('shows passport approval to passport approvers', async () => {
+    const authenticatedUser = { sub: 'manager-1', firstName: 'Manager' }
+    const view = vi.fn(() => 'rendered')
+    getHubAuthSession.mockReturnValue(authenticatedUser)
+    getActionsToComplete.mockResolvedValue([])
+    hasRole.mockImplementation(
+      (_user, { role }) => role === 'lis-role-passport-approver'
+    )
+
+    await homeController.handler({}, { view })
+
+    expect(view).toHaveBeenCalledWith(
+      'home/dashboard',
+      expect.objectContaining({
+        canFindUsers: false,
+        canApprovePassport: true
+      })
     )
   })
 
