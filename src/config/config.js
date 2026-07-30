@@ -22,6 +22,12 @@ export const config = convict({
     default: null,
     env: 'SERVICE_VERSION'
   },
+  environment: {
+    doc: 'The current environment',
+    format: ['local', 'docker_compose', 'dev', 'test', 'perf-test', 'prod'],
+    default: 'local',
+    env: 'ENVIRONMENT'
+  },
   host: {
     doc: 'The IP address to bind',
     format: 'ipaddress',
