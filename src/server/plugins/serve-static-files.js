@@ -1,6 +1,6 @@
-import { createBasePathHelpersForConfig } from '@livestock/ui-services/base-path'
-import { createStaticFilesPlugin } from '@livestock/ui-services/static-files'
-import { statusCodes } from '@livestock/ui-services/status-codes'
+import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
+import { createStaticFilesPlugin } from '@defra/lis-infra-ui-services/static-files'
+import { statusCodes } from '@defra/lis-infra-ui-services/status-codes'
 
 import { config } from '#config/config.js'
 

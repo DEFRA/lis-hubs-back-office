@@ -1,4 +1,4 @@
-import { getModulesForHub } from '@livestock/hubs-infra-registry'
+import { getModulesForHub } from '@defra/lis-hubs-infra-registry'
 
 import { config } from '#config/config.js'
 
