@@ -6,7 +6,7 @@ const { getHubAuthSession, searchCphs, searchUsers } = vi.hoisted(() => ({
   searchUsers: vi.fn()
 }))
 
-vi.mock('@livestock/hubs-infra-access/auth', () => ({ getHubAuthSession }))
+vi.mock('@defra/lis-hubs-infra-access/auth', () => ({ getHubAuthSession }))
 vi.mock('#server/services/search.js', () => ({
   PAGE_SIZE: 20,
   searchCphs,
