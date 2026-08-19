@@ -91,7 +91,7 @@ jobs:
         env:
           IMAGE: ${{ steps.image.outputs.ref }}
         run: |
-          container=$(docker run --detach --publish 3101:3101 "$IMAGE")
+          container=$(docker run --detach --publish 3102:3102 "$IMAGE")
 
           cleanup() {
             docker logs "$container" || true
@@ -100,7 +100,7 @@ jobs:
           trap cleanup EXIT
 
           for attempt in {1..30}; do
-            if curl --fail --silent --show-error http://localhost:3101/health >/dev/null; then
+            if curl --fail --silent --show-error http://localhost:3102/health >/dev/null; then
               exit 0
             fi
             sleep 1
