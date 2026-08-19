@@ -1,5 +1,5 @@
-import { getHubAuthSession, hasRole } from '@livestock/hubs-infra-access/auth'
-import { SPECIES } from '@livestock/hubs-infra-registry'
+import { getHubAuthSession, hasRole } from '@defra/lis-hubs-infra-access/auth'
+import { SPECIES } from '@defra/lis-hubs-infra-registry'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
 

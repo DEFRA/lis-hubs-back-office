@@ -1,4 +1,4 @@
-import { getHubAuthSession } from '@livestock/hubs-infra-access/auth'
+import { getHubAuthSession } from '@defra/lis-hubs-infra-access/auth'
 
 import {
   getCph,

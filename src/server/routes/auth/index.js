@@ -2,7 +2,7 @@ import {
   createHubAuthPlugin,
   createHubCookieOptions,
   resolveAuthorization
-} from '@livestock/hubs-infra-access/auth'
+} from '@defra/lis-hubs-infra-access/auth'
 
 import { config } from '#config/config.js'
 import {

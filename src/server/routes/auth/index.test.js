@@ -1,5 +1,5 @@
 import hapi from '@hapi/hapi'
-import { verifyHubJwt } from '@livestock/hubs-infra-access/auth'
+import { verifyHubJwt } from '@defra/lis-hubs-infra-access/auth'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const {
@@ -22,8 +22,8 @@ const { clearHubAuthSession } = vi.hoisted(() => ({
   clearHubAuthSession: vi.fn()
 }))
 
-vi.mock('@livestock/hubs-infra-access/auth', async () => {
-  const actual = await vi.importActual('@livestock/hubs-infra-access/auth')
+vi.mock('@defra/lis-hubs-infra-access/auth', async () => {
+  const actual = await vi.importActual('@defra/lis-hubs-infra-access/auth')
 
   return {
     ...actual,
@@ -184,7 +184,10 @@ describe('#backOfficeAuthRoutes', () => {
       'lis-role-reader',
       'lis-role-back-office',
       'lis-role-caseworker',
-      'lis-role-cattle-write'
+      'lis-role-cattle-write',
+      'lis-role-cattle-register-write',
+      'lis-role-sheep-write',
+      'lis-role-sheep-register-write'
     ])
     expect('permissions' in payload).toBe(false)
     expect(payload.authzVersion).toBe(1)
