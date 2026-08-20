@@ -31,7 +31,11 @@ export const proxy = {
             throw new Error(`Unhandled environment: ${environment}`)
         }
 
-        const baseUri = `${protocol}://${host}:${port}`
+        let baseUri = `${protocol}://${host}`
+
+        if (environment === 'local' || environment === 'docker_compose') {
+          baseUri = `${baseUri}:${port}`
+        }
 
         server.route({
           method: '*',
