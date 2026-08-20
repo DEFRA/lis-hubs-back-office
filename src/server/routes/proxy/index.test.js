@@ -24,8 +24,8 @@ describe('proxy', () => {
     ['local', 'http://localhost:3222'],
     // eslint-disable-next-line sonarjs/no-clear-text-protocols
     ['docker_compose', 'http://cattle-home:3222'],
-    ['test', 'https://lis-cattle-home.test.cdp-int.defra.cloud:3222'],
-    ['prod', 'https://lis-cattle-home.prod.cdp-int.defra.cloud:3222']
+    ['test', 'https://lis-apps-cattle-home.test.cdp-int.defra.cloud'],
+    ['prod', 'https://lis-apps-cattle-home.prod.cdp-int.defra.cloud']
   ])('it registers the %s proxy target', (environment, expectedBaseUri) => {
     // Arrange
     mocks.configGet.mockReturnValue(environment)

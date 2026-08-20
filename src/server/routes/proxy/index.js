@@ -24,14 +24,18 @@ export const proxy = {
           case 'test':
           case 'perf-test':
           case 'prod':
-            host = `lis-${moduleName}.${environment}.cdp-int.defra.cloud`
+            host = `lis-apps-${moduleName}.${environment}.cdp-int.defra.cloud`
             protocol = 'https'
             break
           default:
             throw new Error(`Unhandled environment: ${environment}`)
         }
 
-        const baseUri = `${protocol}://${host}:${port}`
+        let baseUri = `${protocol}://${host}`
+
+        if (environment === 'local' || environment === 'docker_compose') {
+          baseUri = `${baseUri}:${port}`
+        }
 
         server.route({
           method: '*',
