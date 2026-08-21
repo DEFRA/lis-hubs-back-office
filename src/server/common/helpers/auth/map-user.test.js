@@ -7,7 +7,6 @@ describe('mapUser()', () => {
     // Arrange
     const payload = { sub: 'user-1', firstName: 'Case', lastName: 'Worker' }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'test-service' }
     }
 
@@ -28,7 +27,6 @@ describe('mapUser()', () => {
       family_name: 'Worker'
     }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'test-service' }
     }
 
@@ -51,7 +49,6 @@ describe('mapUser()', () => {
       family_name: 'ID'
     }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'test-service' }
     }
 
@@ -68,7 +65,6 @@ describe('mapUser()', () => {
     // Arrange
     const payload = { sub: 'user-1' }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'test-service' }
     }
 
@@ -85,7 +81,6 @@ describe('mapUser()', () => {
     // Arrange
     const payload = { sub: 'user-1', roles: ['lis-role-reader'], amr: ['pwd'] }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'test-service' }
     }
 
@@ -102,7 +97,6 @@ describe('mapUser()', () => {
     // Arrange
     const payload = { sub: 'user-1' }
     const context = {
-      providerId: 'test-provider',
       providerConfig: { serviceId: 'provider-service-id' }
     }
 

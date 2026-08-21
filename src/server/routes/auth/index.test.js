@@ -102,7 +102,7 @@ describe('#backOfficeAuthRoutes', () => {
     configGet.mockImplementation((path) => configValues[path])
   })
 
-  test('Should use the primary provider for the default login route', async () => {
+  test('Should redirect to the configured provider login route', async () => {
     buildAuthorizationUrl.mockResolvedValue('https://entra.example.test/login')
 
     const server = await createTestServer()
@@ -115,10 +115,7 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('https://entra.example.test/login')
-    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
-      expect.any(Object),
-      undefined
-    )
+    expect(buildAuthorizationUrl).toHaveBeenCalledWith(expect.any(Object))
   })
 
   test('Should return a service unavailable response when the provider login configuration is invalid', async () => {
@@ -149,8 +146,7 @@ describe('#backOfficeAuthRoutes', () => {
       roles: ['bcms_user'],
       serviceId: 'test-service',
       loa: 'substantial',
-      amr: ['pwd'],
-      authProvider: 'sso'
+      amr: ['pwd']
     }
     const authSession = {
       ...user,

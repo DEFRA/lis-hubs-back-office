@@ -1,4 +1,10 @@
-import { afterAll, beforeAll, describe, expect, test } from 'vitest'
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
+
+vi.mock('#server/common/helpers/auth/oidc.js', () => ({
+  buildAuthorizationUrl: vi.fn(),
+  buildLogoutUrl: vi.fn(),
+  completeAuthorizationCodeGrant: vi.fn()
+}))
 
 describe('#backOfficeServer', () => {
   const originalLogFormat = process.env.LOG_FORMAT

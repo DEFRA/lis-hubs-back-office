@@ -5,6 +5,11 @@ import { createServer } from '#server/server.js'
 import { startServer } from './start-server.js'
 
 vi.mock('#server/server.js')
+vi.mock('#server/common/helpers/auth/oidc.js', () => ({
+  buildAuthorizationUrl: vi.fn(),
+  buildLogoutUrl: vi.fn(),
+  completeAuthorizationCodeGrant: vi.fn()
+}))
 
 const mocks = {
   configGet: vi.spyOn(config, 'get'),

@@ -8,9 +8,8 @@ export const {
   buildAuthorizationUrl,
   buildLogoutUrl,
   completeAuthorizationCodeGrant
-} = createOidcClient({
-  getProviderConfig,
-  getHubOrigin: config.get.bind(config, 'auth.hubOrigin'),
-  getPrimaryProviderId: config.get.bind(config, 'auth.primaryProvider'),
+} = await createOidcClient({
+  provider: getProviderConfig(config.get('auth.primaryProvider')),
+  hubOrigin: config.get('auth.hubOrigin'),
   mapUser
 })
