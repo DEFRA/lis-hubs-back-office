@@ -5,11 +5,8 @@ import {
 } from '@defra/lis-hubs-infra-access/auth'
 
 import { config } from '#config/config.js'
-import {
-  buildAuthorizationUrl,
-  buildLogoutUrl,
-  completeAuthorizationCodeGrant
-} from '#server/common/helpers/auth/oidc.js'
+import { getProviderConfig } from '#server/common/helpers/auth/get-provider-config.js'
+import { mapUser } from '#server/common/helpers/auth/map-user.js'
 
 function resolveAuthSession({ user }) {
   return resolveAuthorization({
@@ -39,13 +36,13 @@ function getHubJwtConfig() {
   }
 }
 
-export const auth = createHubAuthPlugin({
+export const auth = await createHubAuthPlugin({
   getHubJwtCookieName,
   getCookieOptions,
   getHubJwtConfig,
   resolveAuthSession,
-  buildAuthorizationUrl,
-  completeAuthorizationCodeGrant,
-  buildLogoutUrl,
+  provider: getProviderConfig(config.get('auth.primaryProvider')),
+  hubOrigin: config.get('auth.hubOrigin'),
+  mapUser,
   loginPath: '/auth/login'
 })

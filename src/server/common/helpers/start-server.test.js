@@ -5,11 +5,16 @@ import { createServer } from '#server/server.js'
 import { startServer } from './start-server.js'
 
 vi.mock('#server/server.js')
-vi.mock('#server/common/helpers/auth/oidc.js', () => ({
-  buildAuthorizationUrl: vi.fn(),
-  buildLogoutUrl: vi.fn(),
-  completeAuthorizationCodeGrant: vi.fn()
-}))
+vi.mock('@defra/lis-hubs-infra-access/auth', async () => {
+  const actual = await vi.importActual('@defra/lis-hubs-infra-access/auth')
+
+  return {
+    ...actual,
+    createHubAuthPlugin: vi.fn(async () => ({
+      plugin: { name: 'auth', register: () => undefined }
+    }))
+  }
+})
 
 const mocks = {
   configGet: vi.spyOn(config, 'get'),
