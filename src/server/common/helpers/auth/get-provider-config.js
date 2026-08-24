@@ -14,6 +14,7 @@ export function getProviderConfig(providerId) {
     clientId: config.get(`auth.providers.${providerId}.clientId`),
     clientSecret: config.get(`auth.providers.${providerId}.clientSecret`),
     redirectPath: config.get(`auth.providers.${providerId}.redirectPath`),
-    serviceId: config.get(`auth.providers.${providerId}.serviceId`)
+    serviceId: config.get(`auth.providers.${providerId}.serviceId`),
+    scope: config.get(`auth.providers.${providerId}.scope`)
   }
 }

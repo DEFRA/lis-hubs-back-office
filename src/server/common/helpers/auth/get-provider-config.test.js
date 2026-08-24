@@ -20,7 +20,8 @@ describe('getProviderConfig()', () => {
       'auth.providers.entra.clientId': 'entra-client-id',
       'auth.providers.entra.clientSecret': 'entra-client-secret',
       'auth.providers.entra.redirectPath': '/sso',
-      'auth.providers.entra.serviceId': 'entra-service-id'
+      'auth.providers.entra.serviceId': 'entra-service-id',
+      'auth.providers.entra.scope': 'openid email profile'
     }
     mocks.configGet.mockImplementation((key) => configValues[key])
 
@@ -33,7 +34,8 @@ describe('getProviderConfig()', () => {
       clientId: 'entra-client-id',
       clientSecret: 'entra-client-secret',
       redirectPath: '/sso',
-      serviceId: 'entra-service-id'
+      serviceId: 'entra-service-id',
+      scope: 'openid email profile'
     })
   })
 

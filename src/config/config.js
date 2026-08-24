@@ -283,6 +283,12 @@ export const config = convict({
           default: '/sso',
           env: 'OIDC_REDIRECT_PATH'
         },
+        scope: {
+          doc: 'OIDC scope requested from the primary SSO provider',
+          format: String,
+          default: 'openid email profile',
+          env: 'OIDC_SCOPE'
+        },
         serviceId: {
           doc: 'Optional service id for the primary SSO provider',
           format: String,
