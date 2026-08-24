@@ -45,14 +45,14 @@ describe('#backOfficeServer', () => {
     )
   })
 
-  test('Should render the back-office welcome page', async () => {
+  test('Should redirect unauthenticated requests to the root route to login', async () => {
     const response = await server.inject({
       method: 'GET',
       url: '/'
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.result).toContain('Livestock back office')
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/auth/login?returnUrl=%2F')
   })
 
   test('Should render submitted registration review actions', async () => {

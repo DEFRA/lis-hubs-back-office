@@ -33,7 +33,8 @@ describe('getProviderConfig()', () => {
       clientId: 'entra-client-id',
       clientSecret: 'entra-client-secret',
       redirectPath: '/sso',
-      serviceId: 'entra-service-id'
+      serviceId: 'entra-service-id',
+      scope: 'openid email profile'
     })
   })
 

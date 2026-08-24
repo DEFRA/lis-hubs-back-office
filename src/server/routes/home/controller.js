@@ -1,5 +1,4 @@
 import { getHubAuthSession, hasRole } from '@defra/lis-hubs-infra-access/auth'
-import { SPECIES } from '@defra/lis-hubs-infra-registry'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
 
@@ -11,12 +10,10 @@ export const homeController = {
     const authenticatedUser = getHubAuthSession(request)
 
     if (!authenticatedUser) {
-      return h.view('home/welcome', {
-        pageTitle: 'Welcome',
-        heading: 'Livestock back office',
-        supportedSpecies: SPECIES,
-        loginUrl: '/auth/login?returnUrl=/'
-      })
+      const returnUrl = encodeURIComponent(
+        request.url.pathname + request.url.search
+      )
+      return h.redirect(`/auth/login?returnUrl=${returnUrl}`)
     }
 
     return h.view('home/dashboard', {

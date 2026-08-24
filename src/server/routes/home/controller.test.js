@@ -19,20 +19,17 @@ import { getGreeting, homeController } from './controller.js'
 describe('#backOfficeHomeController', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  test('renders the welcome view for unauthenticated users', async () => {
-    const view = vi.fn(() => 'rendered')
+  test('redirects unauthenticated users to login', async () => {
+    const redirect = vi.fn(() => 'redirected')
     getHubAuthSession.mockReturnValue(null)
 
-    const response = await homeController.handler({}, { view })
-
-    expect(response).toBe('rendered')
-    expect(view).toHaveBeenCalledWith(
-      'home/welcome',
-      expect.objectContaining({
-        heading: 'Livestock back office',
-        loginUrl: '/auth/login?returnUrl=/'
-      })
+    const response = await homeController.handler(
+      { url: new URL('http://localhost/') },
+      { redirect }
     )
+
+    expect(response).toBe('redirected')
+    expect(redirect).toHaveBeenCalledWith('/auth/login?returnUrl=%2F')
   })
 
   test('renders the dashboard with the Entra first name and actions', async () => {
