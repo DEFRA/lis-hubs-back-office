@@ -1,8 +1,4 @@
-import {
-  getHubAuthSession,
-  hasPermission,
-  PERMISSIONS
-} from '@defra/lis-hubs-infra-access/auth'
+import { hasPermission, PERMISSIONS } from '@defra/lis-hubs-infra-access/auth'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
 import { requireBackOfficeAccess } from '#server/common/helpers/auth/require-back-office-access.js'
@@ -18,7 +14,7 @@ export const homeController = {
       return denied
     }
 
-    const authenticatedUser = getHubAuthSession(request)
+    const authenticatedUser = request.app.hubAuth
 
     return h.view('home/dashboard', {
       pageTitle: 'Dashboard',

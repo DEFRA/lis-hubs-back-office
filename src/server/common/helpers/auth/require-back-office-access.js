@@ -1,8 +1,4 @@
-import {
-  getHubAuthSession,
-  hasPermission,
-  PERMISSIONS
-} from '@defra/lis-hubs-infra-access/auth'
+import { hasPermission, PERMISSIONS } from '@defra/lis-hubs-infra-access/auth'
 
 const permissionDeniedStatusCode = 403
 
@@ -16,7 +12,7 @@ const permissionDeniedStatusCode = 403
  * @returns {object|null}
  */
 export function requireBackOfficeAccess(request, h) {
-  const authenticatedUser = getHubAuthSession(request)
+  const authenticatedUser = request.app.hubAuth
 
   if (!authenticatedUser) {
     const returnUrl = encodeURIComponent(

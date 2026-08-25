@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getHubAuthSession, hasPermission } = vi.hoisted(() => ({
-  getHubAuthSession: vi.fn(),
+const { hasPermission } = vi.hoisted(() => ({
   hasPermission: vi.fn()
 }))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  getHubAuthSession,
   hasPermission,
   PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
@@ -29,9 +27,11 @@ describe('requireBackOfficeAccess()', () => {
 
   test('redirects unauthenticated requests to login with a returnUrl', () => {
     // Arrange
-    const request = { url: new URL('http://localhost/cphs?searchBy=browse') }
+    const request = {
+      app: { hubAuth: null },
+      url: new URL('http://localhost/cphs?searchBy=browse')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(null)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
@@ -46,9 +46,11 @@ describe('requireBackOfficeAccess()', () => {
   test('denies authenticated requests without back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
-    const request = { url: new URL('http://localhost/') }
+    const request = {
+      app: { hubAuth: authenticatedUser },
+      url: new URL('http://localhost/')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     hasPermission.mockReturnValue(false)
 
     // Act
@@ -65,9 +67,11 @@ describe('requireBackOfficeAccess()', () => {
   test('allows authenticated requests with back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
-    const request = { url: new URL('http://localhost/') }
+    const request = {
+      app: { hubAuth: authenticatedUser },
+      url: new URL('http://localhost/')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     hasPermission.mockReturnValue(true)
 
     // Act

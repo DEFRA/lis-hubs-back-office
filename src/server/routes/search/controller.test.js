@@ -1,23 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const {
-  getCph,
-  getHubAuthSession,
-  getUser,
-  hasPermission,
-  searchCphs,
-  searchUsers
-} = vi.hoisted(() => ({
-  getCph: vi.fn(),
-  getHubAuthSession: vi.fn(),
-  getUser: vi.fn(),
-  hasPermission: vi.fn(),
-  searchCphs: vi.fn(),
-  searchUsers: vi.fn()
-}))
+const { getCph, getUser, hasPermission, searchCphs, searchUsers } = vi.hoisted(
+  () => ({
+    getCph: vi.fn(),
+    getUser: vi.fn(),
+    hasPermission: vi.fn(),
+    searchCphs: vi.fn(),
+    searchUsers: vi.fn()
+  })
+)
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  getHubAuthSession,
   hasPermission,
   PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
@@ -43,10 +36,11 @@ function responseToolkit() {
   }
 }
 
+const authenticatedUser = { sub: 'user-1' }
+
 describe('#searchControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    getHubAuthSession.mockReturnValue({ sub: 'user-1' })
     hasPermission.mockReturnValue(true)
     searchCphs.mockResolvedValue({ items: [], total: 0 })
     searchUsers.mockResolvedValue({ items: [], total: 0 })
@@ -56,6 +50,7 @@ describe('#searchControllers', () => {
     const h = responseToolkit()
     await cphSearchController.handler(
       {
+        app: { hubAuth: authenticatedUser },
         query: { searchBy: 'address', postcode: 'SW1A 1AA' },
         url: new URL('http://localhost/cphs?searchBy=address')
       },
@@ -73,6 +68,7 @@ describe('#searchControllers', () => {
     const h = responseToolkit()
     await cphSearchController.handler(
       {
+        app: { hubAuth: authenticatedUser },
         query: {
           searchBy: 'address',
           postcode: ' SW1A 1AA ',
@@ -97,6 +93,7 @@ describe('#searchControllers', () => {
     const h = responseToolkit()
     await userSearchController.handler(
       {
+        app: { hubAuth: authenticatedUser },
         query: { searchBy: 'cph', cph: '12/345/6789', apply: '1' },
         url: new URL('http://localhost/users')
       },
@@ -114,11 +111,11 @@ describe('#searchControllers', () => {
   })
 
   test('redirects unauthenticated users back through login', async () => {
-    getHubAuthSession.mockReturnValue(null)
     const h = responseToolkit()
 
     await cphSearchController.handler(
       {
+        app: { hubAuth: null },
         query: {},
         url: new URL('http://localhost/cphs?searchBy=browse')
       },
@@ -136,6 +133,7 @@ describe('#searchControllers', () => {
 
     await cphSearchController.handler(
       {
+        app: { hubAuth: authenticatedUser },
         query: { searchBy: 'browse', page: '2' },
         url: new URL('http://localhost/cphs?searchBy=browse&page=2')
       },
@@ -172,6 +170,7 @@ describe('#searchControllers', () => {
 
     await cphSearchController.handler(
       {
+        app: { hubAuth: authenticatedUser },
         query: { searchBy: 'browse' },
         url: new URL('http://localhost/cphs?searchBy=browse')
       },
@@ -188,7 +187,6 @@ describe('#searchControllers', () => {
 describe('#detailsControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    getHubAuthSession.mockReturnValue({ sub: 'user-1' })
     hasPermission.mockReturnValue(true)
   })
 
@@ -196,7 +194,10 @@ describe('#detailsControllers', () => {
     const h = responseToolkit()
     getCph.mockResolvedValue({ cph: '12/345/6789' })
 
-    await cphDetailsController.handler({ params: { id: '12/345/6789' } }, h)
+    await cphDetailsController.handler(
+      { app: { hubAuth: authenticatedUser }, params: { id: '12/345/6789' } },
+      h
+    )
 
     expect(getCph).toHaveBeenCalledWith('12/345/6789')
     expect(h.view).toHaveBeenCalledWith('search/cph-details', {
@@ -209,7 +210,10 @@ describe('#detailsControllers', () => {
     const h = responseToolkit()
     getUser.mockResolvedValue({ name: 'Test Farmer' })
 
-    await userDetailsController.handler({ params: { id: 'user-1' } }, h)
+    await userDetailsController.handler(
+      { app: { hubAuth: authenticatedUser }, params: { id: 'user-1' } },
+      h
+    )
 
     expect(getUser).toHaveBeenCalledWith('user-1')
     expect(h.view).toHaveBeenCalledWith('search/user-details', {
@@ -222,7 +226,10 @@ describe('#detailsControllers', () => {
     const h = { view: vi.fn(() => h), code: vi.fn(() => h) }
     getCph.mockResolvedValue(undefined)
 
-    await cphDetailsController.handler({ params: { id: 'unknown' } }, h)
+    await cphDetailsController.handler(
+      { app: { hubAuth: authenticatedUser }, params: { id: 'unknown' } },
+      h
+    )
 
     expect(h.view).toHaveBeenCalledWith(
       'search/not-found',
@@ -232,11 +239,11 @@ describe('#detailsControllers', () => {
   })
 
   test('redirects unauthenticated users back through login', async () => {
-    getHubAuthSession.mockReturnValue(null)
     const h = responseToolkit()
 
     await cphDetailsController.handler(
       {
+        app: { hubAuth: null },
         params: { id: '12/345/6789' },
         url: new URL('http://localhost/cphs/12%2F345%2F6789')
       },

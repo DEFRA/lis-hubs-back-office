@@ -1,15 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getActionsToComplete, getHubAuthSession, hasPermission } = vi.hoisted(
-  () => ({
-    getActionsToComplete: vi.fn(),
-    getHubAuthSession: vi.fn(),
-    hasPermission: vi.fn()
-  })
-)
+const { getActionsToComplete, hasPermission } = vi.hoisted(() => ({
+  getActionsToComplete: vi.fn(),
+  hasPermission: vi.fn()
+}))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  getHubAuthSession,
   hasPermission,
   PERMISSIONS: {
     backOffice: 'lis-perm-back-office',
@@ -27,10 +23,9 @@ describe('#backOfficeHomeController', () => {
 
   test('redirects unauthenticated users to login', async () => {
     const redirect = vi.fn(() => 'redirected')
-    getHubAuthSession.mockReturnValue(null)
 
     const response = await homeController.handler(
-      { url: new URL('http://localhost/') },
+      { app: { hubAuth: null }, url: new URL('http://localhost/') },
       { redirect }
     )
 
@@ -42,13 +37,15 @@ describe('#backOfficeHomeController', () => {
     const authenticatedUser = { sub: 'user-1', firstName: 'Case' }
     const actions = [{ title: 'Review application', url: '/actions/1' }]
     const view = vi.fn(() => 'rendered')
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue(actions)
     hasPermission.mockImplementation(
       (_user, { permission }) => permission === 'lis-perm-back-office'
     )
 
-    const response = await homeController.handler({}, { view })
+    const response = await homeController.handler(
+      { app: { hubAuth: authenticatedUser } },
+      { view }
+    )
 
     expect(response).toBe('rendered')
     expect(getActionsToComplete).toHaveBeenCalledWith({
@@ -71,7 +68,6 @@ describe('#backOfficeHomeController', () => {
   test('shows passport approval to passport approvers', async () => {
     const authenticatedUser = { sub: 'manager-1', firstName: 'Manager' }
     const view = vi.fn(() => 'rendered')
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue([])
     hasPermission.mockImplementation(
       (_user, { permission }) =>
@@ -79,7 +75,10 @@ describe('#backOfficeHomeController', () => {
         permission === 'lis-perm-back-office'
     )
 
-    await homeController.handler({}, { view })
+    await homeController.handler(
+      { app: { hubAuth: authenticatedUser } },
+      { view }
+    )
 
     expect(view).toHaveBeenCalledWith(
       'home/dashboard',
