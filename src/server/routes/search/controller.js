@@ -1,5 +1,3 @@
-import { getHubAuthSession } from '@defra/lis-hubs-infra-access/auth'
-
 import {
   getCph,
   getUser,
@@ -7,6 +5,7 @@ import {
   searchCphs,
   searchUsers
 } from '#server/services/search.js'
+import { requireBackOfficeAccess } from '#server/common/helpers/auth/require-back-office-access.js'
 
 const notFoundStatusCode = 404
 const minimumPageCountForPagination = 2
@@ -87,8 +86,10 @@ export const userDetailsController = createDetailsController({
 function createSearchController(options) {
   return {
     async handler(request, h) {
-      if (!getHubAuthSession(request)) {
-        return redirectToLogin(request, h)
+      const denied = requireBackOfficeAccess(request, h)
+
+      if (denied) {
+        return denied
       }
 
       const searchBy = options.searchTypes[request.query.searchBy]
@@ -133,8 +134,10 @@ function createSearchController(options) {
 function createDetailsController({ load, view, resultName }) {
   return {
     async handler(request, h) {
-      if (!getHubAuthSession(request)) {
-        return redirectToLogin(request, h)
+      const denied = requireBackOfficeAccess(request, h)
+
+      if (denied) {
+        return denied
       }
 
       const item = await load(request.params.id)
@@ -155,13 +158,6 @@ function createDetailsController({ load, view, resultName }) {
       })
     }
   }
-}
-
-function redirectToLogin(request, h) {
-  const returnUrl = encodeURIComponent(
-    request.url.pathname + request.url.search
-  )
-  return h.redirect(`/auth/login?returnUrl=${returnUrl}`)
 }
 
 function positiveInteger(value) {

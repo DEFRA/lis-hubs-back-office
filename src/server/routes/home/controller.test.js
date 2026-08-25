@@ -38,7 +38,9 @@ describe('#backOfficeHomeController', () => {
     const view = vi.fn(() => 'rendered')
     getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue(actions)
-    hasRole.mockReturnValue(false)
+    hasRole.mockImplementation(
+      (_user, { role }) => role === 'lis-role-back-office'
+    )
 
     const response = await homeController.handler({}, { view })
 
@@ -66,7 +68,8 @@ describe('#backOfficeHomeController', () => {
     getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue([])
     hasRole.mockImplementation(
-      (_user, { role }) => role === 'lis-role-passport-approver'
+      (_user, { role }) =>
+        role === 'lis-role-passport-approver' || role === 'lis-role-back-office'
     )
 
     await homeController.handler({}, { view })

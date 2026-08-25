@@ -183,11 +183,11 @@ describe('#backOfficeAuthRoutes', () => {
     expect(payload.roles).toEqual([
       'lis-role-reader',
       'lis-role-back-office',
-      'lis-role-caseworker',
       'lis-role-cattle-write',
       'lis-role-cattle-register-write',
-      'lis-role-sheep-write',
-      'lis-role-sheep-register-write'
+      'lis-role-cattle-home-write',
+      'lis-role-cattle-death-write',
+      'lis-role-cattle-move-write'
     ])
     expect('permissions' in payload).toBe(false)
     expect(payload.authzVersion).toBe(1)
