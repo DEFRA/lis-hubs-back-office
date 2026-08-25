@@ -13,6 +13,7 @@ import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plug
 import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
 import { createSessionCachePluginForConfig } from '@defra/lis-infra-ui-services/session-cache'
 import { getCacheEngine } from '@defra/lis-infra-ui-services/session-cache/cache-engine'
+import { setupProxy } from '@defra/lis-infra-ui-services/proxy/setup-proxy'
 
 import { config } from '#config/config.js'
 import { contentSecurityPolicy } from '#server/plugins/content-security-policy.js'
@@ -37,6 +38,11 @@ const nunjucksConfig = createNunjucksConfig({
  * @returns {Promise<Server>}
  */
 export async function createServer() {
+  setupProxy({
+    proxyUrl: config.get('httpProxy'),
+    logger
+  })
+
   const server = hapi.server({
     host: config.get('host'),
     port: config.get('port'),
