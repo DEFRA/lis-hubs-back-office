@@ -1,6 +1,7 @@
 import {
   createHubAuthPlugin,
   createHubCookieOptions,
+  GLOBAL_CPH_SCOPE,
   resolveAuthorization
 } from '@defra/lis-hubs-infra-access/auth'
 
@@ -15,7 +16,10 @@ function resolveAuthSession({ user }) {
   return resolveAuthorization({
     source: 'entra',
     // Accept both Entra's BCMS roles and LIS roles from identity adapters.
-    sourceRoles: user.roles
+    holdingRoles: (user.roles ?? []).map((role) => ({
+      role,
+      cph: GLOBAL_CPH_SCOPE
+    }))
   })
 }
 
