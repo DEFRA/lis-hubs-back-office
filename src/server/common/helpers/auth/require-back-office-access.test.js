@@ -7,7 +7,8 @@ const { getHubAuthSession, hasPermission } = vi.hoisted(() => ({
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasPermission
+  hasPermission,
+  PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
 
 import { requireBackOfficeAccess } from './require-back-office-access.js'

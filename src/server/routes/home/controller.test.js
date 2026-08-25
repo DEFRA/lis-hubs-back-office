@@ -10,7 +10,11 @@ const { getActionsToComplete, getHubAuthSession, hasPermission } = vi.hoisted(
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasPermission
+  hasPermission,
+  PERMISSIONS: {
+    backOffice: 'lis-perm-back-office',
+    passportApprover: 'lis-perm-passport-approver'
+  }
 }))
 vi.mock('#server/services/actions-to-complete.js', () => ({
   getActionsToComplete

@@ -18,7 +18,8 @@ const {
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasPermission
+  hasPermission,
+  PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
 vi.mock('#server/services/search.js', () => ({
   PAGE_SIZE: 20,

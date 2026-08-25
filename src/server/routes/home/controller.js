@@ -1,6 +1,7 @@
 import {
   getHubAuthSession,
-  hasPermission
+  hasPermission,
+  PERMISSIONS
 } from '@defra/lis-hubs-infra-access/auth'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
@@ -27,7 +28,7 @@ export const homeController = {
         user: authenticatedUser
       }),
       canApprovePassport: hasPermission(authenticatedUser, {
-        permission: 'lis-perm-passport-approver'
+        permission: PERMISSIONS.passportApprover
       }),
       logoutUrl: '/auth/logout'
     })

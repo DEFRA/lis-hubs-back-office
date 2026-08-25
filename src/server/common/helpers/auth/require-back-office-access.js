@@ -1,10 +1,10 @@
 import {
   getHubAuthSession,
-  hasPermission
+  hasPermission,
+  PERMISSIONS
 } from '@defra/lis-hubs-infra-access/auth'
 
 const permissionDeniedStatusCode = 403
-const backOfficePermission = 'lis-perm-back-office'
 
 /**
  * Redirects unauthenticated requests to login, and denies authenticated
@@ -25,7 +25,9 @@ export function requireBackOfficeAccess(request, h) {
     return h.redirect(`/auth/login?returnUrl=${returnUrl}`)
   }
 
-  if (!hasPermission(authenticatedUser, { permission: backOfficePermission })) {
+  if (
+    !hasPermission(authenticatedUser, { permission: PERMISSIONS.backOffice })
+  ) {
     return h
       .response({ message: 'Permission denied' })
       .code(permissionDeniedStatusCode)
