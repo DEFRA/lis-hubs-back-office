@@ -48,17 +48,28 @@ describe('requireBackOfficeAccess()', () => {
     const authenticatedUser = { sub: 'user-1' }
     const request = {
       app: { hubAuth: authenticatedUser },
-      url: new URL('http://localhost/')
+      url: new URL('http://localhost/'),
+      path: '/',
+      logger: { warn: vi.fn() }
     }
     const h = responseToolkit()
     hasPermission.mockReturnValue(false)
 
     // Act
-    const result = requireBackOfficeAccess(request, h)
+    let error
+    try {
+      requireBackOfficeAccess(request, h)
+    } catch (e) {
+      error = e
+    }
 
     // Assert
-    expect(h.response).toHaveBeenCalledWith({ message: 'Permission denied' })
-    expect(result.code).toHaveBeenCalledWith(403)
+    expect(error?.isBoom).toBe(true)
+    expect(error?.output.statusCode).toBe(403)
+    expect(request.logger.warn).toHaveBeenCalledWith(
+      { userId: 'user-1', path: '/' },
+      'Back-office access denied'
+    )
     expect(hasPermission).toHaveBeenCalledWith(authenticatedUser, {
       permission: 'lis-perm-back-office'
     })

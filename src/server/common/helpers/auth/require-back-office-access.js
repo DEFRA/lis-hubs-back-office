@@ -1,11 +1,12 @@
+import Boom from '@hapi/boom'
 import { hasPermission, PERMISSIONS } from '@defra/lis-hubs-infra-access/auth'
 
-const permissionDeniedStatusCode = 403
-
 /**
- * Redirects unauthenticated requests to login, and denies authenticated
- * requests that lack back-office access. Returns a response to send
- * when access is not granted, or `null` when the request may proceed.
+ * Redirects unauthenticated requests to login, and throws a Boom 403 for
+ * authenticated requests that lack back-office access - caught by the
+ * shared onPreResponse handler, which renders the standard error page.
+ * Returns a redirect response for unauthenticated requests, or `null`
+ * when the request may proceed.
  *
  * @param {object} request
  * @param {object} h
@@ -24,9 +25,11 @@ export function requireBackOfficeAccess(request, h) {
   if (
     !hasPermission(authenticatedUser, { permission: PERMISSIONS.backOffice })
   ) {
-    return h
-      .response({ message: 'Permission denied' })
-      .code(permissionDeniedStatusCode)
+    request.logger.warn(
+      { userId: authenticatedUser.sub, path: request.path },
+      'Back-office access denied'
+    )
+    throw Boom.forbidden()
   }
 
   return null
