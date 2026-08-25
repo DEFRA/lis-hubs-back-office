@@ -1,4 +1,7 @@
-import { getHubAuthSession, hasRole } from '@defra/lis-hubs-infra-access/auth'
+import {
+  getHubAuthSession,
+  hasPermission
+} from '@defra/lis-hubs-infra-access/auth'
 
 import { getActionsToComplete } from '#server/services/actions-to-complete.js'
 import { requireBackOfficeAccess } from '#server/common/helpers/auth/require-back-office-access.js'
@@ -23,8 +26,8 @@ export const homeController = {
       actionsToComplete: await getActionsToComplete({
         user: authenticatedUser
       }),
-      canApprovePassport: hasRole(authenticatedUser, {
-        role: 'lis-role-passport-approver'
+      canApprovePassport: hasPermission(authenticatedUser, {
+        permission: 'lis-perm-passport-approver'
       }),
       logoutUrl: '/auth/logout'
     })

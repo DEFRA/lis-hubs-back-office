@@ -1,18 +1,24 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getCph, getHubAuthSession, getUser, hasRole, searchCphs, searchUsers } =
-  vi.hoisted(() => ({
-    getCph: vi.fn(),
-    getHubAuthSession: vi.fn(),
-    getUser: vi.fn(),
-    hasRole: vi.fn(),
-    searchCphs: vi.fn(),
-    searchUsers: vi.fn()
-  }))
+const {
+  getCph,
+  getHubAuthSession,
+  getUser,
+  hasPermission,
+  searchCphs,
+  searchUsers
+} = vi.hoisted(() => ({
+  getCph: vi.fn(),
+  getHubAuthSession: vi.fn(),
+  getUser: vi.fn(),
+  hasPermission: vi.fn(),
+  searchCphs: vi.fn(),
+  searchUsers: vi.fn()
+}))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasRole
+  hasPermission
 }))
 vi.mock('#server/services/search.js', () => ({
   PAGE_SIZE: 20,
@@ -40,7 +46,7 @@ describe('#searchControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     getHubAuthSession.mockReturnValue({ sub: 'user-1' })
-    hasRole.mockReturnValue(true)
+    hasPermission.mockReturnValue(true)
     searchCphs.mockResolvedValue({ items: [], total: 0 })
     searchUsers.mockResolvedValue({ items: [], total: 0 })
   })
@@ -182,7 +188,7 @@ describe('#detailsControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     getHubAuthSession.mockReturnValue({ sub: 'user-1' })
-    hasRole.mockReturnValue(true)
+    hasPermission.mockReturnValue(true)
   })
 
   test('renders CPH details when the CPH is found', async () => {

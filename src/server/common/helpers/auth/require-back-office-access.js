@@ -1,11 +1,14 @@
-import { getHubAuthSession, hasRole } from '@defra/lis-hubs-infra-access/auth'
+import {
+  getHubAuthSession,
+  hasPermission
+} from '@defra/lis-hubs-infra-access/auth'
 
-const roleDeniedStatusCode = 403
-const backOfficeRole = 'lis-role-back-office'
+const permissionDeniedStatusCode = 403
+const backOfficePermission = 'lis-perm-back-office'
 
 /**
  * Redirects unauthenticated requests to login, and denies authenticated
- * requests that lack the back-office role. Returns a response to send
+ * requests that lack back-office access. Returns a response to send
  * when access is not granted, or `null` when the request may proceed.
  *
  * @param {object} request
@@ -22,8 +25,10 @@ export function requireBackOfficeAccess(request, h) {
     return h.redirect(`/auth/login?returnUrl=${returnUrl}`)
   }
 
-  if (!hasRole(authenticatedUser, { role: backOfficeRole })) {
-    return h.response({ message: 'Role denied' }).code(roleDeniedStatusCode)
+  if (!hasPermission(authenticatedUser, { permission: backOfficePermission })) {
+    return h
+      .response({ message: 'Permission denied' })
+      .code(permissionDeniedStatusCode)
   }
 
   return null

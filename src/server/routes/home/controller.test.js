@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getActionsToComplete, getHubAuthSession, hasRole } = vi.hoisted(() => ({
-  getActionsToComplete: vi.fn(),
-  getHubAuthSession: vi.fn(),
-  hasRole: vi.fn()
-}))
+const { getActionsToComplete, getHubAuthSession, hasPermission } = vi.hoisted(
+  () => ({
+    getActionsToComplete: vi.fn(),
+    getHubAuthSession: vi.fn(),
+    hasPermission: vi.fn()
+  })
+)
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasRole
+  hasPermission
 }))
 vi.mock('#server/services/actions-to-complete.js', () => ({
   getActionsToComplete
@@ -38,8 +40,8 @@ describe('#backOfficeHomeController', () => {
     const view = vi.fn(() => 'rendered')
     getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue(actions)
-    hasRole.mockImplementation(
-      (_user, { role }) => role === 'lis-role-back-office'
+    hasPermission.mockImplementation(
+      (_user, { permission }) => permission === 'lis-perm-back-office'
     )
 
     const response = await homeController.handler({}, { view })
@@ -56,9 +58,9 @@ describe('#backOfficeHomeController', () => {
         canApprovePassport: false
       })
     )
-    expect(hasRole).toHaveBeenCalledWith(
+    expect(hasPermission).toHaveBeenCalledWith(
       authenticatedUser,
-      expect.objectContaining({ role: 'lis-role-passport-approver' })
+      expect.objectContaining({ permission: 'lis-perm-passport-approver' })
     )
   })
 
@@ -67,9 +69,10 @@ describe('#backOfficeHomeController', () => {
     const view = vi.fn(() => 'rendered')
     getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue([])
-    hasRole.mockImplementation(
-      (_user, { role }) =>
-        role === 'lis-role-passport-approver' || role === 'lis-role-back-office'
+    hasPermission.mockImplementation(
+      (_user, { permission }) =>
+        permission === 'lis-perm-passport-approver' ||
+        permission === 'lis-perm-back-office'
     )
 
     await homeController.handler({}, { view })

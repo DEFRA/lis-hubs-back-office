@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getHubAuthSession, hasRole } = vi.hoisted(() => ({
+const { getHubAuthSession, hasPermission } = vi.hoisted(() => ({
   getHubAuthSession: vi.fn(),
-  hasRole: vi.fn()
+  hasPermission: vi.fn()
 }))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   getHubAuthSession,
-  hasRole
+  hasPermission
 }))
 
 import { requireBackOfficeAccess } from './require-back-office-access.js'
@@ -42,32 +42,32 @@ describe('requireBackOfficeAccess()', () => {
     )
   })
 
-  test('denies authenticated requests without the back-office role', () => {
+  test('denies authenticated requests without back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
     const request = { url: new URL('http://localhost/') }
     const h = responseToolkit()
     getHubAuthSession.mockReturnValue(authenticatedUser)
-    hasRole.mockReturnValue(false)
+    hasPermission.mockReturnValue(false)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
 
     // Assert
-    expect(h.response).toHaveBeenCalledWith({ message: 'Role denied' })
+    expect(h.response).toHaveBeenCalledWith({ message: 'Permission denied' })
     expect(result.code).toHaveBeenCalledWith(403)
-    expect(hasRole).toHaveBeenCalledWith(authenticatedUser, {
-      role: 'lis-role-back-office'
+    expect(hasPermission).toHaveBeenCalledWith(authenticatedUser, {
+      permission: 'lis-perm-back-office'
     })
   })
 
-  test('allows authenticated requests with the back-office role', () => {
+  test('allows authenticated requests with back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
     const request = { url: new URL('http://localhost/') }
     const h = responseToolkit()
     getHubAuthSession.mockReturnValue(authenticatedUser)
-    hasRole.mockReturnValue(true)
+    hasPermission.mockReturnValue(true)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
