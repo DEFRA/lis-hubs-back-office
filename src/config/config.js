@@ -109,6 +109,13 @@ export const config = convict({
       env: 'LOG_REDACT'
     }
   },
+  httpProxy: {
+    doc: 'HTTP Proxy',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'HTTP_PROXY'
+  },
   session: {
     cache: {
       engine: {
