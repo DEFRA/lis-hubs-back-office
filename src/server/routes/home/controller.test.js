@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getActionsToComplete, getHubAuthSession, hasRole } = vi.hoisted(() => ({
+const { getActionsToComplete, hasPermission } = vi.hoisted(() => ({
   getActionsToComplete: vi.fn(),
-  getHubAuthSession: vi.fn(),
-  hasRole: vi.fn()
+  hasPermission: vi.fn()
 }))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  getHubAuthSession,
-  hasRole
+  hasPermission,
+  PERMISSIONS: {
+    backOffice: 'lis-perm-back-office',
+    passportApprover: 'lis-perm-passport-approver'
+  }
 }))
 vi.mock('#server/services/actions-to-complete.js', () => ({
   getActionsToComplete
@@ -21,10 +23,9 @@ describe('#backOfficeHomeController', () => {
 
   test('redirects unauthenticated users to login', async () => {
     const redirect = vi.fn(() => 'redirected')
-    getHubAuthSession.mockReturnValue(null)
 
     const response = await homeController.handler(
-      { url: new URL('http://localhost/') },
+      { app: { hubAuth: null }, url: new URL('http://localhost/') },
       { redirect }
     )
 
@@ -36,13 +37,15 @@ describe('#backOfficeHomeController', () => {
     const authenticatedUser = { sub: 'user-1', firstName: 'Case' }
     const actions = [{ title: 'Review application', url: '/actions/1' }]
     const view = vi.fn(() => 'rendered')
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue(actions)
-    hasRole.mockImplementation(
-      (_user, { role }) => role === 'lis-role-back-office'
+    hasPermission.mockImplementation(
+      (_user, { permission }) => permission === 'lis-perm-back-office'
     )
 
-    const response = await homeController.handler({}, { view })
+    const response = await homeController.handler(
+      { app: { hubAuth: authenticatedUser } },
+      { view }
+    )
 
     expect(response).toBe('rendered')
     expect(getActionsToComplete).toHaveBeenCalledWith({
@@ -56,23 +59,26 @@ describe('#backOfficeHomeController', () => {
         canApprovePassport: false
       })
     )
-    expect(hasRole).toHaveBeenCalledWith(
+    expect(hasPermission).toHaveBeenCalledWith(
       authenticatedUser,
-      expect.objectContaining({ role: 'lis-role-passport-approver' })
+      expect.objectContaining({ permission: 'lis-perm-passport-approver' })
     )
   })
 
   test('shows passport approval to passport approvers', async () => {
     const authenticatedUser = { sub: 'manager-1', firstName: 'Manager' }
     const view = vi.fn(() => 'rendered')
-    getHubAuthSession.mockReturnValue(authenticatedUser)
     getActionsToComplete.mockResolvedValue([])
-    hasRole.mockImplementation(
-      (_user, { role }) =>
-        role === 'lis-role-passport-approver' || role === 'lis-role-back-office'
+    hasPermission.mockImplementation(
+      (_user, { permission }) =>
+        permission === 'lis-perm-passport-approver' ||
+        permission === 'lis-perm-back-office'
     )
 
-    await homeController.handler({}, { view })
+    await homeController.handler(
+      { app: { hubAuth: authenticatedUser } },
+      { view }
+    )
 
     expect(view).toHaveBeenCalledWith(
       'home/dashboard',

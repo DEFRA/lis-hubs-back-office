@@ -180,15 +180,11 @@ describe('#backOfficeAuthRoutes', () => {
     const payload = await verifyHubJwt(token, jwtConfig)
 
     expect(payload.sub).toBe(user.sub)
-    expect(payload.roles).toEqual([
-      'lis-role-reader',
-      'lis-role-back-office',
-      'lis-role-cattle-write',
-      'lis-role-cattle-register-write',
-      'lis-role-cattle-home-write',
-      'lis-role-cattle-death-write',
-      'lis-role-cattle-move-write'
+    expect(payload.statements).toEqual([
+      { role: 'lis-role-reader', cphs: '*' },
+      { role: 'lis-role-bcms-user', cphs: '*' }
     ])
+    expect('roles' in payload).toBe(false)
     expect('permissions' in payload).toBe(false)
     expect(payload.authzVersion).toBe(1)
   })

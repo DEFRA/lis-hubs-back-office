@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getHubAuthSession, hasRole } = vi.hoisted(() => ({
-  getHubAuthSession: vi.fn(),
-  hasRole: vi.fn()
+const { hasPermission } = vi.hoisted(() => ({
+  hasPermission: vi.fn()
 }))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  getHubAuthSession,
-  hasRole
+  hasPermission,
+  PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
 
 import { requireBackOfficeAccess } from './require-back-office-access.js'
@@ -28,9 +27,11 @@ describe('requireBackOfficeAccess()', () => {
 
   test('redirects unauthenticated requests to login with a returnUrl', () => {
     // Arrange
-    const request = { url: new URL('http://localhost/cphs?searchBy=browse') }
+    const request = {
+      app: { hubAuth: null },
+      url: new URL('http://localhost/cphs?searchBy=browse')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(null)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
@@ -42,32 +43,36 @@ describe('requireBackOfficeAccess()', () => {
     )
   })
 
-  test('denies authenticated requests without the back-office role', () => {
+  test('denies authenticated requests without back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
-    const request = { url: new URL('http://localhost/') }
+    const request = {
+      app: { hubAuth: authenticatedUser },
+      url: new URL('http://localhost/')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(authenticatedUser)
-    hasRole.mockReturnValue(false)
+    hasPermission.mockReturnValue(false)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
 
     // Assert
-    expect(h.response).toHaveBeenCalledWith({ message: 'Role denied' })
+    expect(h.response).toHaveBeenCalledWith({ message: 'Permission denied' })
     expect(result.code).toHaveBeenCalledWith(403)
-    expect(hasRole).toHaveBeenCalledWith(authenticatedUser, {
-      role: 'lis-role-back-office'
+    expect(hasPermission).toHaveBeenCalledWith(authenticatedUser, {
+      permission: 'lis-perm-back-office'
     })
   })
 
-  test('allows authenticated requests with the back-office role', () => {
+  test('allows authenticated requests with back-office access', () => {
     // Arrange
     const authenticatedUser = { sub: 'user-1' }
-    const request = { url: new URL('http://localhost/') }
+    const request = {
+      app: { hubAuth: authenticatedUser },
+      url: new URL('http://localhost/')
+    }
     const h = responseToolkit()
-    getHubAuthSession.mockReturnValue(authenticatedUser)
-    hasRole.mockReturnValue(true)
+    hasPermission.mockReturnValue(true)
 
     // Act
     const result = requireBackOfficeAccess(request, h)
