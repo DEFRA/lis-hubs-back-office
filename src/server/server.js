@@ -2,10 +2,9 @@
 import path from 'node:path'
 
 import hapi from '@hapi/hapi'
-import h2o2 from '@hapi/h2o2'
 import inert from '@hapi/inert'
 import Scooter from '@hapi/scooter'
-import { requestContext } from '@defra/lis-hubs-infra-core'
+import { createProxyPlugin, requestContext } from '@defra/lis-hubs-infra-core'
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
 import { getLoggerForConfig } from '@defra/lis-infra-ui-services/logging'
 import { getRequestLoggerPluginForConfig } from '@defra/lis-infra-ui-services/logging'
@@ -22,12 +21,17 @@ import { auth } from '#server/routes/auth/index.js'
 import { health } from '#server/routes/health/index.js'
 import { home } from '#server/routes/home/index.js'
 import { search } from '#server/routes/search/index.js'
-import { proxy } from '#server/routes/proxy/index.js'
 
 const logger = getLoggerForConfig(config)
 const requestLogger = getRequestLoggerPluginForConfig(config)
 const sessionCache = createSessionCachePluginForConfig(config)
-const { getRequestBasePath } = createBasePathHelpersForConfig(config)
+const proxy = createProxyPlugin({
+  hubId: 'back-office',
+  environment: config.get('environment')
+})
+const { getRequestBasePath } = createBasePathHelpersForConfig({
+  assetPath: config.get('assetPath')
+})
 const nunjucksConfig = createNunjucksConfig({
   config,
   logger,
@@ -74,7 +78,6 @@ export async function createServer() {
   await server.register([
     requestContext.plugin,
     inert,
-    h2o2,
     Scooter,
     requestLogger,
     sessionCache,

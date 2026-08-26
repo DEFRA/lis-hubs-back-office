@@ -40,12 +40,6 @@ export const config = convict({
     default: 3102,
     env: 'PORT'
   },
-  basePath: {
-    doc: 'Optional mount path for the application when it is hosted behind a proxy',
-    format: String,
-    default: '',
-    env: 'BASE_PATH'
-  },
   serviceName: {
     doc: 'Application service name',
     format: String,
