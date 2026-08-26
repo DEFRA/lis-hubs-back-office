@@ -4,7 +4,9 @@ import { statusCodes } from '@defra/lis-infra-ui-services/status-codes'
 
 import { config } from '#config/config.js'
 
-const { getAssetPaths } = createBasePathHelpersForConfig(config)
+const { getAssetPaths } = createBasePathHelpersForConfig({
+  assetPath: config.get('assetPath')
+})
 
 export const serveStaticFiles = createStaticFilesPlugin({
   assetPaths: getAssetPaths(),
