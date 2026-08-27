@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
 import { hasPermission, PERMISSIONS } from '@defra/lis-hubs-infra-access/auth'
+import { logger } from '@defra/lis-hubs-infra-core'
 
 /**
  * Redirects unauthenticated requests to login, and throws a Boom 403 for
@@ -25,7 +26,7 @@ export function requireBackOfficeAccess(request, h) {
   if (
     !hasPermission(authenticatedUser, { permission: PERMISSIONS.backOffice })
   ) {
-    request.logger.warn(
+    logger.warn(
       { userId: authenticatedUser.sub, path: request.path },
       'Back-office access denied'
     )

@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { hasPermission } = vi.hoisted(() => ({
-  hasPermission: vi.fn()
+const { hasPermission, logger } = vi.hoisted(() => ({
+  hasPermission: vi.fn(),
+  logger: { warn: vi.fn() }
 }))
 
 vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
   hasPermission,
   PERMISSIONS: { backOffice: 'lis-perm-back-office' }
 }))
+
+vi.mock('@defra/lis-hubs-infra-core', () => ({ logger }))
 
 import { requireBackOfficeAccess } from './require-back-office-access.js'
 
@@ -49,8 +52,7 @@ describe('requireBackOfficeAccess()', () => {
     const request = {
       app: { hubAuth: authenticatedUser },
       url: new URL('http://localhost/'),
-      path: '/',
-      logger: { warn: vi.fn() }
+      path: '/'
     }
     const h = responseToolkit()
     hasPermission.mockReturnValue(false)
@@ -66,7 +68,7 @@ describe('requireBackOfficeAccess()', () => {
     // Assert
     expect(error?.isBoom).toBe(true)
     expect(error?.output.statusCode).toBe(403)
-    expect(request.logger.warn).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       { userId: 'user-1', path: '/' },
       'Back-office access denied'
     )
