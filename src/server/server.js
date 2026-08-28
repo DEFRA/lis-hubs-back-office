@@ -85,7 +85,10 @@ export async function createServer() {
   })
 
   await server.register([
-    requestContext.plugin,
+    {
+      plugin: requestContext.plugin,
+      options: { originService: 'back-office' }
+    },
     inert,
     Scooter,
     requestLogger,

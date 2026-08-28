@@ -217,6 +217,13 @@ export const config = convict({
       default: 'http://localhost:3102',
       env: 'HUB_ORIGIN'
     },
+    userIdHashSecret: {
+      doc: 'Fixed key used to derive a pseudonymous, non-reversible user_id for log context',
+      format: String,
+      default: 'local-dev-user-id-hash-secret-please-change-1234567890',
+      env: 'USER_ID_HASH_SECRET',
+      sensitive: true
+    },
     primaryProvider: {
       doc: 'Authentication provider for back-office',
       format: String,
