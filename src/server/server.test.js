@@ -6,7 +6,7 @@ describe('#backOfficeServer', () => {
   let server
 
   beforeAll(async () => {
-    process.env.LOG_FORMAT = 'pino-pretty'
+    process.env.LOG_FORMAT = 'pretty'
     ;({ createServer } = await import('./server.js'))
     server = await createServer()
     await server.initialize()
