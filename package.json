@@ -35,9 +35,9 @@
   },
   "dependencies": {
     "@defra/lis-hubs-infra-access": "^0.14.0",
-    "@defra/lis-hubs-infra-core": "^0.5.0",
+    "@defra/lis-hubs-infra-core": "^0.6.0",
     "@defra/lis-hubs-infra-registry": "^0.3.0",
-    "@defra/lis-infra-ui-services": "^0.7.0",
+    "@defra/lis-infra-ui-services": "^0.8.0",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.4.8",
     "@hapi/inert": "7.1.0",
