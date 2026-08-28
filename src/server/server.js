@@ -24,14 +24,17 @@ import { health } from '#server/routes/health/index.js'
 import { home } from '#server/routes/home/index.js'
 import { search } from '#server/routes/search/index.js'
 
+const serviceName = 'lis-hubs-back-office'
+
 logger.level = config.get('log.level')
 logger.enabled = config.get('log.enabled')
 logger.format =
-  config.get('log.format') === 'pino-pretty'
+  config.get('log.format') === 'pretty'
     ? 'pretty-print'
     : config.get('log.format')
-logger.serviceName = 'lis-hubs-back-office'
+logger.serviceName = serviceName
 logger.serviceVersion = config.get('serviceVersion')
+logger.context.hashSecret = config.get('log.hashSecret')
 const requestLogger = logger.hapiPlugin
 const sessionCache = createSessionCachePluginForConfig(config)
 const proxy = createProxyPlugin({
@@ -85,7 +88,10 @@ export async function createServer() {
   })
 
   await server.register([
-    requestContext.plugin,
+    {
+      plugin: requestContext.plugin,
+      options: { serviceName }
+    },
     inert,
     Scooter,
     requestLogger,
