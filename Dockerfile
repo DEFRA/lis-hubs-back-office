@@ -13,11 +13,8 @@ ARG PORT_DEBUG
 ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
-# .npmrc is gitignored and written by .scripts/publish.sh; when present it points
-# @livestock at the local Verdaccio so it is copied in for local builds. Absent in
-# CI, so npm falls back to the default registry.
-COPY --chown=node:node --chmod=755 package*.json .npmrc* ./
-RUN npm install
+COPY --chown=node:node --chmod=755 package*.json ./
+RUN npm ci
 COPY --chown=node:node --chmod=755 . .
 RUN npm run build:frontend
 
