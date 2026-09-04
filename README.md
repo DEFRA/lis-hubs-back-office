@@ -10,10 +10,10 @@ Authentication:
 
 Expected dependencies:
 
-- `@livestock/hubs-infra-access`
+- `@defra/lis-hubs-infra-access`
 - `@livestock/hubs-infra-core`
 - `@livestock/hubs-infra-registry`
-- `@livestock/ui-services`
+- `@defra/lis-infra-ui-services`
 
 Current state:
 
@@ -23,7 +23,7 @@ Current state:
 - static asset and favicon routes are now wired through the back-office server shell
 - content security policy is now owned by the back-office server shell
 - shared module metadata comes from `@livestock/hubs-infra-registry`
-- authentication, sessions and access decisions come from `@livestock/hubs-infra-access`
+- authentication, sessions and access decisions come from `@defra/lis-hubs-infra-access`
 
 ## OIDC callback
 

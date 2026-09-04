@@ -34,13 +34,13 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@defra/lis-hubs-infra-access": "^0.15.0",
-    "@defra/lis-hubs-infra-core": "^0.6.0",
+    "@defra/lis-hubs-infra-access": "^0.16.0",
+    "@defra/lis-hubs-infra-core": "^0.7.0",
     "@defra/lis-hubs-infra-registry": "^0.3.0",
     "@defra/lis-infra-ui-services": "^0.8.0",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.4.8",
-    "@hapi/inert": "7.1.0",
+    "@hapi/inert": "7.1.2",
     "@hapi/scooter": "8.0.0",
     "blankie": "5.0.0",
     "convict": "6.2.5",
@@ -60,11 +60,11 @@
     "neostandard": "0.13.0",
     "nodemon": "3.1.14",
     "npm-run-all": "4.1.5",
-    "prettier": "3.8.2",
+    "prettier": "3.9.6",
     "sass-embedded": "1.99.0",
-    "stylelint": "16.26.1",
-    "stylelint-config-gds": "2.0.0",
-    "vite": "8.0.8",
+    "stylelint": "17.15.0",
+    "stylelint-config-gds": "3.0.0",
+    "vite": "8.2.2",
     "vitest": "4.1.4",
     "vitest-fetch-mock": "0.4.5"
   }
