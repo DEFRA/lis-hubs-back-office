@@ -39,7 +39,8 @@ const requestLogger = logger.hapiPlugin
 const sessionCache = createSessionCachePluginForConfig(config)
 const proxy = createProxyPlugin({
   hubId: 'back-office',
-  environment: config.get('environment')
+  environment: config.get('environment'),
+  hubJwtCookieName: config.get('auth.hubJwt.cookieName')
 })
 const { getRequestBasePath } = createBasePathHelpersForConfig({
   assetPath: config.get('assetPath')
