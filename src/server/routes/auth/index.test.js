@@ -6,32 +6,13 @@ const {
   buildAuthorizationUrl,
   buildLogoutUrl,
   completeAuthorizationCodeGrant,
-  configGet,
-  getHubAuthSession,
-  setHubAuthSession
+  configGet
 } = vi.hoisted(() => ({
   buildAuthorizationUrl: vi.fn(),
   buildLogoutUrl: vi.fn(),
   completeAuthorizationCodeGrant: vi.fn(),
-  configGet: vi.fn(),
-  getHubAuthSession: vi.fn(),
-  setHubAuthSession: vi.fn()
+  configGet: vi.fn()
 }))
-
-const { clearHubAuthSession } = vi.hoisted(() => ({
-  clearHubAuthSession: vi.fn()
-}))
-
-vi.mock('@defra/lis-hubs-infra-access/auth', async () => {
-  const actual = await vi.importActual('@defra/lis-hubs-infra-access/auth')
-
-  return {
-    ...actual,
-    clearHubAuthSession,
-    getHubAuthSession,
-    setHubAuthSession
-  }
-})
 
 vi.mock('#config/config.js', () => ({
   config: {
@@ -61,10 +42,7 @@ function createConfigValueMap() {
     'auth.hubJwt.issuer': jwtConfig.issuer,
     'auth.hubJwt.audience': jwtConfig.audience,
     'auth.hubJwt.ttlSeconds': 14400,
-    'session.cookie.secure': false,
-    'profileService.url': 'http://localhost:4000/api/profile',
-    'profileService.apiKey': '',
-    'profileService.apiKeyHeader': 'x-api-key'
+    'session.cookie.secure': false
   }
 }
 
