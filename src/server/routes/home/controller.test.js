@@ -5,7 +5,7 @@ const { getActionsToComplete, hasPermission } = vi.hoisted(() => ({
   hasPermission: vi.fn()
 }))
 
-vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
+vi.mock('@defra/lis-hubs-infra-access/authorization', () => ({
   hasPermission,
   PERMISSIONS: {
     backOffice: 'lis-perm-back-office',
@@ -21,18 +21,6 @@ import { getGreeting, homeController } from './controller.js'
 describe('#backOfficeHomeController', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  test('redirects unauthenticated users to login', async () => {
-    const redirect = vi.fn(() => 'redirected')
-
-    const response = await homeController.handler(
-      { app: { hubAuth: null }, url: new URL('http://localhost/') },
-      { redirect }
-    )
-
-    expect(response).toBe('redirected')
-    expect(redirect).toHaveBeenCalledWith('/auth/login?returnUrl=%2F')
-  })
-
   test('renders the dashboard with the Entra first name and actions', async () => {
     const authenticatedUser = { sub: 'user-1', firstName: 'Case' }
     const actions = [{ title: 'Review application', url: '/actions/1' }]
@@ -43,7 +31,7 @@ describe('#backOfficeHomeController', () => {
     )
 
     const response = await homeController.handler(
-      { app: { hubAuth: authenticatedUser } },
+      { auth: { credentials: { user: authenticatedUser } } },
       { view }
     )
 
@@ -76,7 +64,7 @@ describe('#backOfficeHomeController', () => {
     )
 
     await homeController.handler(
-      { app: { hubAuth: authenticatedUser } },
+      { auth: { credentials: { user: authenticatedUser } } },
       { view }
     )
 

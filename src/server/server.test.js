@@ -1,4 +1,19 @@
+import { HUB_AUTH_STRATEGY } from '@defra/lis-hubs-infra-access/authentication'
+import { PERMISSIONS } from '@defra/lis-hubs-infra-access/authorization'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
+
+function hubAuth(permissions) {
+  return {
+    strategy: HUB_AUTH_STRATEGY,
+    credentials: {
+      user: {
+        sub: 'user-1',
+        statements: [{ role: 'test', cphs: '*', permissions }]
+      },
+      authorizedSpecies: []
+    }
+  }
+}
 
 describe('#backOfficeServer', () => {
   const originalLogFormat = process.env.LOG_FORMAT
@@ -53,6 +68,38 @@ describe('#backOfficeServer', () => {
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/auth/login?returnUrl=%2F')
+  })
+
+  test('Should redirect unauthenticated search requests to login with the full return URL', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/cphs?searchBy=browse'
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(
+      '/auth/login?returnUrl=%2Fcphs%3FsearchBy%3Dbrowse'
+    )
+  })
+
+  test('Should deny signed-in users without back-office access', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/cphs?searchBy=address',
+      auth: hubAuth([])
+    })
+
+    expect(response.statusCode).toBe(403)
+  })
+
+  test('Should allow signed-in users with back-office access', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/cphs?searchBy=address',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.statusCode).toBe(200)
   })
 
   test('Should render submitted registration review actions', async () => {
