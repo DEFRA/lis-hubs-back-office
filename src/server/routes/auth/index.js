@@ -1,9 +1,14 @@
 import {
-  createHubAuthPlugin,
-  createHubCookieOptions,
+  createHubAuth,
+  createHubCookieOptions
+} from '@defra/lis-hubs-infra-access/authentication'
+import {
   GLOBAL_CPH_SCOPE,
+  PERMISSIONS,
+  hasPermission,
   resolveAuthorization
-} from '@defra/lis-hubs-infra-access/auth'
+} from '@defra/lis-hubs-infra-access/authorization'
+import { logger } from '@defra/lis-hubs-infra-core'
 
 import { config } from '#config/config.js'
 import {
@@ -43,7 +48,28 @@ function getHubJwtConfig() {
   }
 }
 
-export const auth = createHubAuthPlugin({
+/**
+ * Hub-wide rule: every authenticated back-office request needs back-office
+ * access. A `false` result is a 403, rendered by the shared error page.
+ *
+ * @param {object} user
+ * @param {object} request
+ * @returns {boolean}
+ */
+export function authorizeBackOfficeAccess(user, request) {
+  if (hasPermission(user, { permission: PERMISSIONS.backOffice })) {
+    return true
+  }
+
+  logger.warn(
+    { userId: user.sub, path: request.path },
+    'Back-office access denied'
+  )
+
+  return false
+}
+
+export const auth = createHubAuth({
   getHubJwtCookieName,
   getCookieOptions,
   getHubJwtConfig,
@@ -51,5 +77,6 @@ export const auth = createHubAuthPlugin({
   buildAuthorizationUrl,
   completeAuthorizationCodeGrant,
   buildLogoutUrl,
-  loginRoutes: [{ path: '/auth/login' }]
+  loginRoutes: [{ path: '/auth/login' }],
+  authorize: authorizeBackOfficeAccess
 })

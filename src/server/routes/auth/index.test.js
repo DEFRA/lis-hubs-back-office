@@ -1,18 +1,34 @@
 import hapi from '@hapi/hapi'
-import { verifyHubJwt } from '@defra/lis-hubs-infra-access/auth'
+import { verifyHubJwt } from '@defra/lis-hubs-infra-access/authentication'
+import { PERMISSIONS } from '@defra/lis-hubs-infra-access/authorization'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const {
   buildAuthorizationUrl,
   buildLogoutUrl,
   completeAuthorizationCodeGrant,
-  configGet
+  configGet,
+  warn
 } = vi.hoisted(() => ({
   buildAuthorizationUrl: vi.fn(),
   buildLogoutUrl: vi.fn(),
   completeAuthorizationCodeGrant: vi.fn(),
-  configGet: vi.fn()
+  configGet: vi.fn(),
+  warn: vi.fn()
 }))
+
+vi.mock('@defra/lis-hubs-infra-core', async (importOriginal) => {
+  const original = await importOriginal()
+
+  return {
+    ...original,
+    logger: {
+      warn,
+      error: original.logger.error.bind(original.logger),
+      context: original.logger.context
+    }
+  }
+})
 
 vi.mock('#config/config.js', () => ({
   config: {
@@ -26,7 +42,7 @@ vi.mock('#server/common/helpers/auth/oidc.js', () => ({
   completeAuthorizationCodeGrant
 }))
 
-import { auth } from './index.js'
+import { auth, authorizeBackOfficeAccess } from './index.js'
 
 const jwtConfig = {
   secret: 'test-hub-secret-please-change-1234567890',
@@ -165,5 +181,27 @@ describe('#backOfficeAuthRoutes', () => {
     expect('roles' in payload).toBe(false)
     expect('permissions' in payload).toBe(false)
     expect(payload.authzVersion).toBe(1)
+  })
+
+  test('Should authorize users with back-office access', () => {
+    const user = {
+      sub: 'test-user',
+      statements: [
+        { role: 'test', cphs: '*', permissions: [PERMISSIONS.backOffice] }
+      ]
+    }
+
+    expect(authorizeBackOfficeAccess(user, { path: '/cphs' })).toBe(true)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  test('Should refuse and log users without back-office access', () => {
+    const user = { sub: 'test-user', statements: [] }
+
+    expect(authorizeBackOfficeAccess(user, { path: '/cphs' })).toBe(false)
+    expect(warn).toHaveBeenCalledWith(
+      { userId: 'test-user', path: '/cphs' },
+      'Back-office access denied'
+    )
   })
 })

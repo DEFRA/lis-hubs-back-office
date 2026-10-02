@@ -5,7 +5,6 @@ import {
   searchCphs,
   searchUsers
 } from '#server/services/search.js'
-import { requireBackOfficeAccess } from '#server/common/helpers/auth/require-back-office-access.js'
 
 const notFoundStatusCode = 404
 const minimumPageCountForPagination = 2
@@ -86,12 +85,6 @@ export const userDetailsController = createDetailsController({
 function createSearchController(options) {
   return {
     async handler(request, h) {
-      const denied = requireBackOfficeAccess(request, h)
-
-      if (denied) {
-        return denied
-      }
-
       const searchBy = options.searchTypes[request.query.searchBy]
         ? request.query.searchBy
         : options.defaultSearchBy
@@ -134,12 +127,6 @@ function createSearchController(options) {
 function createDetailsController({ load, view, resultName }) {
   return {
     async handler(request, h) {
-      const denied = requireBackOfficeAccess(request, h)
-
-      if (denied) {
-        return denied
-      }
-
       const item = await load(request.params.id)
 
       if (!item) {
