@@ -61,10 +61,7 @@ function createConfigValueMap() {
     'auth.hubJwt.issuer': jwtConfig.issuer,
     'auth.hubJwt.audience': jwtConfig.audience,
     'auth.hubJwt.ttlSeconds': 14400,
-    'session.cookie.secure': false,
-    'profileService.url': 'http://localhost:4000/api/profile',
-    'profileService.apiKey': '',
-    'profileService.apiKeyHeader': 'x-api-key'
+    'session.cookie.secure': false
   }
 }
 
