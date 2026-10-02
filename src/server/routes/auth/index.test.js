@@ -6,32 +6,13 @@ const {
   buildAuthorizationUrl,
   buildLogoutUrl,
   completeAuthorizationCodeGrant,
-  configGet,
-  getHubAuthSession,
-  setHubAuthSession
+  configGet
 } = vi.hoisted(() => ({
   buildAuthorizationUrl: vi.fn(),
   buildLogoutUrl: vi.fn(),
   completeAuthorizationCodeGrant: vi.fn(),
-  configGet: vi.fn(),
-  getHubAuthSession: vi.fn(),
-  setHubAuthSession: vi.fn()
+  configGet: vi.fn()
 }))
-
-const { clearHubAuthSession } = vi.hoisted(() => ({
-  clearHubAuthSession: vi.fn()
-}))
-
-vi.mock('@defra/lis-hubs-infra-access/auth', async () => {
-  const actual = await vi.importActual('@defra/lis-hubs-infra-access/auth')
-
-  return {
-    ...actual,
-    clearHubAuthSession,
-    getHubAuthSession,
-    setHubAuthSession
-  }
-})
 
 vi.mock('#config/config.js', () => ({
   config: {
