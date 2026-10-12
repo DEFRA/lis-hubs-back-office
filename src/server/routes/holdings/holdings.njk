@@ -1,5 +1,7 @@
 {% extends 'layouts/page.njk' %}
 
+{% from "sortable-paginated-table/macro.njk" import sortablePaginatedTable %}
+
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -48,24 +50,30 @@
   </div>
 
   {% if searched and total > 0 %}
-    <table class="govuk-table">
-      <caption class="govuk-table__caption govuk-visually-hidden">Holdings search results</caption>
-      <thead class="govuk-table__head"><tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">CPH</th>
-        <th scope="col" class="govuk-table__header">Location</th>
-        <th scope="col" class="govuk-table__header">Status</th>
-      </tr></thead>
-      <tbody class="govuk-table__body">
-        {% for holding in results %}
-          <tr class="govuk-table__row">
-            <th scope="row" class="govuk-table__header"><a class="govuk-link" href="{{ holding.href }}">{{ holding.cph }}</a></th>
-            <td class="govuk-table__cell">{{ holding.location }}</td>
-            <td class="govuk-table__cell">{{ holding.status }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <p class="govuk-body">{{ resultsSummary }}</p>
-    {% if pagination %}{{ govukPagination(pagination) }}{% endif %}
+    {%- set rows = [] -%}
+    {%- for holding in results -%}
+      {%- set cphHtml -%}
+        <a class="govuk-link" href="{{ holding.href }}">{{ holding.cph }}</a>
+      {%- endset -%}
+      {%- set _ = rows.push([
+        { html: cphHtml },
+        { text: holding.location },
+        { text: holding.status }
+      ]) -%}
+    {%- endfor -%}
+
+    {{ sortablePaginatedTable({
+      caption: "Holdings search results",
+      columns: [
+        { text: "CPH" },
+        { text: "Location" },
+        { text: "Status" }
+      ],
+      rows: rows,
+      firstCellIsHeader: true,
+      baseHref: "/holdings",
+      query: { search: search },
+      pagination: pagination
+    }) }}
   {% endif %}
 {% endblock %}

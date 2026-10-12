@@ -168,8 +168,77 @@ describe('#backOfficeServer', () => {
     })
 
     expect(response.payload).toContain('Holdings search results')
-    expect(response.payload).toContain('href="/cattle/holdings/22/001/0001"')
+    expect(response.payload).toMatch(
+      /<th scope="row"[^>]*>\s*<a class="govuk-link" href="\/cattle\/holdings\/22\/001\/0001">/
+    )
     expect(response.payload).not.toContain('You can search using:')
+  })
+
+  test.each([
+    ['Lavendon', 'Showing 11 results'],
+    ['Oakfield', 'Showing 1 result']
+  ])('Should render the results summary for %s', async (search, expected) => {
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${search}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain(expected)
+  })
+
+  test('Should not render a table when nothing matches', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=zzzznomatch',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).not.toContain('<table')
+    expect(response.payload).not.toContain('Holdings search results')
+  })
+
+  test('Should not render sort links', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=Lavendon',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).not.toContain('lis-sortable-table__link')
+    expect(response.payload).not.toContain('aria-sort')
+  })
+
+  test('Should render pagination without sort parameters', async () => {
+    const result = await server.render('holdings/holdings', {
+      pageTitle: 'Page 2 of 3 - Find a holding',
+      search: 'farm',
+      searched: true,
+      total: 60,
+      results: [
+        {
+          cph: '22/001/0001',
+          href: '/cattle/holdings/22/001/0001',
+          location: 'Oakfield Farm',
+          status: 'Active'
+        }
+      ],
+      pagination: {
+        currentPage: 2,
+        totalPages: 3,
+        totalItems: 60,
+        itemsPerPage: 25
+      }
+    })
+    const hrefs = [...result.matchAll(/href="([^"]*)"/g)].map(([, href]) =>
+      href.replaceAll('&amp;', '&')
+    )
+
+    expect(result).toContain('Showing 26 to 50 of 60 results')
+    expect(result).toContain('govuk-pagination__prev')
+    expect(result).toContain('govuk-pagination__next')
+    expect(hrefs).toContain('/holdings?search=farm&page=3')
+    expect(hrefs.join(' ')).not.toMatch(/sort=|direction=/)
   })
 
   test('Should render the search instructions before a search', async () => {

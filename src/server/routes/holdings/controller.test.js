@@ -75,7 +75,6 @@ describe('holdingsController', () => {
       searched: false,
       results: [],
       total: 0,
-      resultsSummary: null,
       pagination: null
     })
   })
@@ -114,8 +113,12 @@ describe('holdingsController', () => {
         searched: true,
         total: 2,
         pageTitle: 'Find a holding',
-        resultsSummary: 'Showing 2 results',
-        pagination: null,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 2,
+          itemsPerPage: 25
+        },
         results: [
           {
             cph: '22/003/0003',
@@ -166,24 +169,6 @@ describe('holdingsController', () => {
     )
   })
 
-  test('summarises a single result', async () => {
-    // Arrange
-    const h = { view: vi.fn() }
-    mocks.searchHoldings.mockResolvedValueOnce(envelope([holding]))
-
-    // Act
-    await holdingsController.handler(
-      { query: { search: 'Meadow', page: 1 } },
-      h
-    )
-
-    // Assert
-    expect(h.view).toHaveBeenCalledWith(
-      'holdings/holdings',
-      expect.objectContaining({ resultsSummary: 'Showing 1 result' })
-    )
-  })
-
   test('renders no rows when nothing matches', async () => {
     // Arrange
     const h = { view: vi.fn() }
@@ -201,13 +186,12 @@ describe('holdingsController', () => {
         searched: true,
         results: [],
         total: 0,
-        resultsSummary: null,
         pagination: null
       })
     )
   })
 
-  test('builds pagination links that keep the encoded search term', async () => {
+  test('passes the pagination state for a multi-page result', async () => {
     // Arrange
     const h = { view: vi.fn() }
     mocks.searchHoldings.mockResolvedValueOnce(envelope([], { totalCount: 30 }))
@@ -223,14 +207,11 @@ describe('holdingsController', () => {
       'holdings/holdings',
       expect.objectContaining({
         pageTitle: 'Page 1 of 2 - Find a holding',
-        resultsSummary: 'Showing 1 to 25 of 30 results',
         pagination: {
-          items: [
-            { number: 1, href: '?search=Old+Farm&page=1', current: true },
-            { number: 2, href: '?search=Old+Farm&page=2', current: false }
-          ],
-          previous: null,
-          next: { href: '?search=Old+Farm&page=2' }
+          currentPage: 1,
+          totalPages: 2,
+          totalItems: 30,
+          itemsPerPage: 25
         }
       })
     )
@@ -256,14 +237,13 @@ describe('holdingsController', () => {
       'holdings/holdings',
       expect.objectContaining({
         pageTitle: 'Page 2 of 2 - Find a holding',
-        resultsSummary: 'Showing 26 to 30 of 30 results',
         results: [expect.objectContaining({ cph: '22/003/0003' })],
-        pagination: expect.objectContaining({
-          items: [
-            expect.objectContaining({ number: 1, current: false }),
-            expect.objectContaining({ number: 2, current: true })
-          ]
-        })
+        pagination: {
+          currentPage: 2,
+          totalPages: 2,
+          totalItems: 30,
+          itemsPerPage: 25
+        }
       })
     )
   })

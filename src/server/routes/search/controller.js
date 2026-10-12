@@ -112,16 +112,8 @@ function clean(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-/**
- * @param {object} options
- * @param {number} options.total
- * @param {number} options.page
- * @param {Record<string, unknown>} options.query
- * @param {number} [options.pageSize]
- * @returns {object | null}
- */
-export function buildPagination({ total, page, query, pageSize = PAGE_SIZE }) {
-  const pageCount = Math.ceil(total / pageSize)
+function buildPagination({ total, page, query }) {
+  const pageCount = Math.ceil(total / PAGE_SIZE)
 
   if (pageCount < minimumPageCountForPagination) {
     return null

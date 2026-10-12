@@ -2,8 +2,6 @@ import Joi from 'joi'
 
 import { PAGE_SIZE, searchHoldings } from '#server/services/holdings.js'
 
-import { buildPagination } from '../search/controller.js'
-
 const maximumSearchLength = 100
 
 export const holdingsQuerySchema = Joi.object({
@@ -40,13 +38,15 @@ export const holdingsController = {
       searched,
       results: values.map(toRow),
       total,
-      resultsSummary: buildResultsSummary({ total, page }),
-      pagination: buildPagination({
-        total,
-        page,
-        query: { search },
-        pageSize: PAGE_SIZE
-      })
+      pagination:
+        total === 0
+          ? null
+          : {
+              currentPage: page,
+              totalPages: pageCount,
+              totalItems: total,
+              itemsPerPage: PAGE_SIZE
+            }
     })
   }
 }
@@ -66,21 +66,6 @@ async function findPage({ search, page }) {
   })
 
   return { ...lastPageResult, page: lastPage }
-}
-
-function buildResultsSummary({ total, page }) {
-  if (total === 0) {
-    return null
-  }
-
-  if (total <= PAGE_SIZE) {
-    return total === 1 ? 'Showing 1 result' : `Showing ${total} results`
-  }
-
-  const from = (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, total)
-
-  return `Showing ${from} to ${to} of ${total} results`
 }
 
 function toRow({ identifier, name, endDate, location: { address } }) {
