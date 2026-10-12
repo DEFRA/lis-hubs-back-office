@@ -45,7 +45,8 @@
     "blankie": "5.0.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0",
-    "govuk-frontend": "6.1.0"
+    "govuk-frontend": "6.1.0",
+    "joi": "18.2.5"
   },
   "devDependencies": {
     "@babel/preset-env": "7.29.2",

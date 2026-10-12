@@ -1,0 +1,71 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Find a holding</h1>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="search-holdings">Enter a CPH number, holding name, postcode or herd mark</label>
+
+        <form method="GET" class="lis-search-form">
+          <div class="lis-search-form__wrapper">
+            <input
+              class="govuk-input lis-search-form__input"
+              type="search"
+              id="search-holdings"
+              name="search"
+              maxlength="100"
+              value="{{ search }}"
+            >
+            <div class="lis-search-form__submit-wrapper">
+              <button class="lis-search-form__submit" type="submit">
+                <svg class="lis-search-form__icon" width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12.0161" cy="11.0161" r="8.51613" stroke="currentColor" stroke-width="3"></circle>
+                  <line x1="17.8668" y1="17.3587" x2="26.4475" y2="25.9393" stroke="currentColor" stroke-width="3"></line>
+                </svg>
+                <span class="govuk-visually-hidden">Search</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {% if not searched %}
+        <p class="govuk-body">You can search using:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>CPH number, for example 12/345/0001</li>
+          <li>holding name, for example Oakfield Farm</li>
+          <li>herd mark, for example UK 123456</li>
+          <li>town or county, for example Cumbria</li>
+          <li>postcode, for example SY4 1AB</li>
+        </ul>
+      {% else %}
+        <p class="govuk-body"><strong>{{ total }}</strong> {% if total == 1 %}holding matches{% else %}holdings match{% endif %} ‘{{ search }}’</p>
+        <p class="govuk-body"><a class="govuk-link" href="/holdings">Clear search</a></p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if searched and total > 0 %}
+    <table class="govuk-table">
+      <caption class="govuk-table__caption govuk-visually-hidden">Holdings search results</caption>
+      <thead class="govuk-table__head"><tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">CPH</th>
+        <th scope="col" class="govuk-table__header">Location</th>
+        <th scope="col" class="govuk-table__header">Status</th>
+      </tr></thead>
+      <tbody class="govuk-table__body">
+        {% for holding in results %}
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header"><a class="govuk-link" href="{{ holding.href }}">{{ holding.cph }}</a></th>
+            <td class="govuk-table__cell">{{ holding.location }}</td>
+            <td class="govuk-table__cell">{{ holding.status }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="govuk-body">{{ resultsSummary }}</p>
+    {% if pagination %}{{ govukPagination(pagination) }}{% endif %}
+  {% endif %}
+{% endblock %}

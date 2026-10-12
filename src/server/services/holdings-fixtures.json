@@ -1,0 +1,621 @@
+[
+  {
+    "identifier": "03/202/0021",
+    "holdingType": "AH",
+    "name": "Old Farm",
+    "startDate": "2012-04-02T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SE3033",
+      "easting": 430120,
+      "northing": 433450,
+      "address": {
+        "udprn": 23456799,
+        "addressLine1": "1 Old Farm",
+        "addressLine2": "Digger Lane",
+        "postTown": "Leeds",
+        "locality": "West Yorkshire",
+        "postcode": "LS1 1AA",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0003",
+        "title": null,
+        "firstName": "Max",
+        "lastName": "Bladen-Clark",
+        "name": "Max Bladen-Clark",
+        "partyType": "Individual",
+        "email": "defralivestock+single-holding@gmail.com",
+        "mobile": null,
+        "telephone": "01234 567 890",
+        "address": {
+          "addressLine1": "1 Old Farm",
+          "addressLine2": "Digger Lane",
+          "addressTown": "Leeds",
+          "addressLocality": "West Yorkshire",
+          "addressNation": "England",
+          "addressPostcode": "LS1 1AA",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324798",
+        "startDate": "2012-04-02T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/001/0001",
+    "holdingType": "AH",
+    "name": "Oakfield Farm",
+    "startDate": "2010-04-01T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SJ4912",
+      "easting": 349120,
+      "northing": 312450,
+      "address": {
+        "udprn": 12345678,
+        "addressLine1": "Oakfield Farm",
+        "addressLine2": "Church Lane",
+        "postTown": "Shrewsbury",
+        "locality": "Shropshire",
+        "postcode": "SY4 1AB",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0001",
+        "title": null,
+        "firstName": "Oakfield",
+        "lastName": "Farmer",
+        "name": "Oakfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+oakfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Oakfield Farm",
+          "addressLine2": "Church Lane",
+          "addressTown": "Shrewsbury",
+          "addressLocality": "Shropshire",
+          "addressNation": "England",
+          "addressPostcode": "SY4 1AB",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324537",
+        "startDate": "2010-04-01T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/002/0002",
+    "holdingType": "AH",
+    "name": "Fairfield Farm",
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489452,
+      "northing": 253102,
+      "address": {
+        "udprn": 23456782,
+        "addressLine1": "Fairfield Farm",
+        "addressLine2": "Manor Road",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AA",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324787",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/003/0003",
+    "holdingType": "AH",
+    "name": null,
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489453,
+      "northing": 253103,
+      "address": {
+        "udprn": 23456783,
+        "addressLine1": "Meadow View Farm",
+        "addressLine2": "Mill Lane",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AB",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324788",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/004/0004",
+    "holdingType": "AH",
+    "name": "Hilltop Farm",
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489454,
+      "northing": 253104,
+      "address": {
+        "udprn": 23456784,
+        "addressLine1": "Hilltop Farm",
+        "addressLine2": "Ridge Road",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AC",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324789",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/005/0005",
+    "holdingType": "AH",
+    "name": "Riverside Farm",
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489455,
+      "northing": 253105,
+      "address": {
+        "udprn": 23456785,
+        "addressLine1": "Riverside Farm",
+        "addressLine2": "Riverbank Lane",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AD",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324790",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/006/0006",
+    "holdingType": "AH",
+    "name": "Long Acre Farm",
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489456,
+      "northing": 253106,
+      "address": {
+        "udprn": 23456786,
+        "addressLine1": "Long Acre Farm",
+        "addressLine2": "Long Lane",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AE",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324791",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/007/0007",
+    "holdingType": "AH",
+    "name": "Orchard Farm",
+    "startDate": "2008-09-15T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": "SP8945",
+      "easting": 489457,
+      "northing": 253107,
+      "address": {
+        "udprn": 23456787,
+        "addressLine1": "Orchard Farm",
+        "addressLine2": "Orchard Road",
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1AF",
+        "country": "England"
+      }
+    },
+    "associations": [
+      {
+        "customerNumber": "CUST0002",
+        "title": null,
+        "firstName": "Fairfield",
+        "lastName": "Farmer",
+        "name": "Fairfield Farmer",
+        "partyType": "Individual",
+        "email": "defralivestock+fairfield@gmail.com",
+        "mobile": null,
+        "telephone": null,
+        "address": {
+          "addressLine1": "Fairfield Farmhouse",
+          "addressLine2": "Manor Road",
+          "addressTown": "Lavendon",
+          "addressLocality": "Buckinghamshire",
+          "addressNation": "England",
+          "addressPostcode": "MK1 1AZ",
+          "addressCountryCode": "GB"
+        },
+        "roles": [
+          {
+            "code": "owner",
+            "species": ["Cattle"]
+          }
+        ]
+      }
+    ],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324792",
+        "startDate": "2008-09-15T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/008/0008",
+    "holdingType": "AH",
+    "name": "Cancelled Holding",
+    "startDate": "2005-01-01T00:00:00Z",
+    "endDate": "2020-06-30T00:00:00Z",
+    "location": {
+      "osMapReference": null,
+      "easting": null,
+      "northing": null,
+      "address": {
+        "udprn": null,
+        "addressLine1": "22/008/0008",
+        "addressLine2": null,
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1BA",
+        "country": "England"
+      }
+    },
+    "associations": [],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324793",
+        "startDate": "2005-01-01T00:00:00Z",
+        "endDate": "2020-06-30T00:00:00Z",
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/009/0009",
+    "holdingType": "AH",
+    "name": "Inactive Holding",
+    "startDate": "2000-01-01T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": null,
+      "easting": null,
+      "northing": null,
+      "address": {
+        "udprn": null,
+        "addressLine1": "22/009/0009",
+        "addressLine2": null,
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1BB",
+        "country": "England"
+      }
+    },
+    "associations": [],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324794",
+        "startDate": "2000-01-01T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/010/0010",
+    "holdingType": "AH",
+    "name": "Unsuitable Holding",
+    "startDate": "2012-01-01T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": null,
+      "easting": null,
+      "northing": null,
+      "address": {
+        "udprn": null,
+        "addressLine1": "22/010/0010",
+        "addressLine2": null,
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1BC",
+        "country": "England"
+      }
+    },
+    "associations": [],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324795",
+        "startDate": "2012-01-01T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/011/0011",
+    "holdingType": "AH",
+    "name": "Sub-location Holding",
+    "startDate": "2015-01-01T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": null,
+      "easting": null,
+      "northing": null,
+      "address": {
+        "udprn": null,
+        "addressLine1": "22/011/0011",
+        "addressLine2": null,
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1BD",
+        "country": "England"
+      }
+    },
+    "associations": [],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324796",
+        "startDate": "2015-01-01T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  },
+  {
+    "identifier": "22/099/0099",
+    "holdingType": "AH",
+    "name": "Empty Holding",
+    "startDate": "2018-01-01T00:00:00Z",
+    "endDate": null,
+    "location": {
+      "osMapReference": null,
+      "easting": null,
+      "northing": null,
+      "address": {
+        "udprn": null,
+        "addressLine1": "22/099/0099",
+        "addressLine2": null,
+        "postTown": "Lavendon",
+        "locality": "Buckinghamshire",
+        "postcode": "MK1 1BE",
+        "country": "England"
+      }
+    },
+    "associations": [],
+    "allowedSpecies": ["Cattle"],
+    "marks": [
+      {
+        "mark": "UK 324797",
+        "startDate": "2018-01-01T00:00:00Z",
+        "endDate": null,
+        "species": ["Cattle"]
+      }
+    ]
+  }
+]

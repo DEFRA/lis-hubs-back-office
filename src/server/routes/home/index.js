@@ -1,5 +1,3 @@
-import { homeController } from './controller.js'
-
 export const home = {
   plugin: {
     name: 'home',
@@ -7,7 +5,7 @@ export const home = {
       server.route({
         method: 'GET',
         path: '/',
-        ...homeController
+        handler: (_request, h) => h.redirect('/holdings')
       })
     }
   }

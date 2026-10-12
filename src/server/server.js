@@ -21,6 +21,7 @@ import { contentSecurityPolicy } from '#server/plugins/content-security-policy.j
 import { serveStaticFiles } from '#server/plugins/serve-static-files.js'
 import { auth } from '#server/routes/auth/index.js'
 import { health } from '#server/routes/health/index.js'
+import { holdings } from '#server/routes/holdings/index.js'
 import { home } from '#server/routes/home/index.js'
 import { search } from '#server/routes/search/index.js'
 
@@ -103,6 +104,7 @@ export async function createServer() {
     auth.plugin,
     health.plugin,
     home.plugin,
+    holdings.plugin,
     search.plugin,
     proxy.plugin
   ])
