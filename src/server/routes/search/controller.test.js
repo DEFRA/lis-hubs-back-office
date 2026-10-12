@@ -1,26 +1,17 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { getCph, getUser, searchCphs, searchUsers } = vi.hoisted(() => ({
-  getCph: vi.fn(),
+const { getUser, searchUsers } = vi.hoisted(() => ({
   getUser: vi.fn(),
-  searchCphs: vi.fn(),
   searchUsers: vi.fn()
 }))
 
 vi.mock('#server/services/search.js', () => ({
   PAGE_SIZE: 20,
-  searchCphs,
   searchUsers,
-  getCph,
   getUser
 }))
 
-import {
-  cphDetailsController,
-  cphSearchController,
-  userDetailsController,
-  userSearchController
-} from './controller.js'
+import { userDetailsController, userSearchController } from './controller.js'
 
 function responseToolkit() {
   return {
@@ -33,31 +24,30 @@ const authenticatedUser = { sub: 'user-1' }
 describe('#searchControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    searchCphs.mockResolvedValue({ items: [], total: 0 })
     searchUsers.mockResolvedValue({ items: [], total: 0 })
   })
 
   test('does not search until Apply is selected', async () => {
     const h = responseToolkit()
-    await cphSearchController.handler(
+    await userSearchController.handler(
       {
         auth: { credentials: { user: authenticatedUser } },
         query: { searchBy: 'address', postcode: 'SW1A 1AA' },
-        url: new URL('http://localhost/cphs?searchBy=address')
+        url: new URL('http://localhost/users?searchBy=address')
       },
       h
     )
 
-    expect(searchCphs).not.toHaveBeenCalled()
+    expect(searchUsers).not.toHaveBeenCalled()
     expect(h.view).toHaveBeenCalledWith(
-      'search/cphs',
+      'search/users',
       expect.objectContaining({ applied: false, searchBy: 'address' })
     )
   })
 
-  test('searches CPHs with a page size of 20 and the address sort', async () => {
+  test('searches users with a page size of 20 and the address sort', async () => {
     const h = responseToolkit()
-    await cphSearchController.handler(
+    await userSearchController.handler(
       {
         auth: { credentials: { user: authenticatedUser } },
         query: {
@@ -66,12 +56,12 @@ describe('#searchControllers', () => {
           apply: '1',
           page: '2'
         },
-        url: new URL('http://localhost/cphs')
+        url: new URL('http://localhost/users')
       },
       h
     )
 
-    expect(searchCphs).toHaveBeenCalledWith({
+    expect(searchUsers).toHaveBeenCalledWith({
       searchBy: 'address',
       filters: { address: '', postcode: 'SW1A 1AA' },
       page: 2,
@@ -103,36 +93,40 @@ describe('#searchControllers', () => {
 
   test('builds pagination links when there is more than one page of results', async () => {
     const h = responseToolkit()
-    searchCphs.mockResolvedValue({ items: [], total: 45 })
+    searchUsers.mockResolvedValue({ items: [], total: 45 })
 
-    await cphSearchController.handler(
+    await userSearchController.handler(
       {
         auth: { credentials: { user: authenticatedUser } },
-        query: { searchBy: 'browse', page: '2' },
-        url: new URL('http://localhost/cphs?searchBy=browse&page=2')
+        query: { searchBy: 'email', apply: '1', page: '2' },
+        url: new URL('http://localhost/users?searchBy=email&apply=1&page=2')
       },
       h
     )
 
     expect(h.view).toHaveBeenCalledWith(
-      'search/cphs',
+      'search/users',
       expect.objectContaining({
         pagination: {
           items: [
             {
               number: 1,
-              href: '?searchBy=browse&page=1',
+              href: '?searchBy=email&apply=1&page=1',
               current: false
             },
-            { number: 2, href: '?searchBy=browse&page=2', current: true },
+            {
+              number: 2,
+              href: '?searchBy=email&apply=1&page=2',
+              current: true
+            },
             {
               number: 3,
-              href: '?searchBy=browse&page=3',
+              href: '?searchBy=email&apply=1&page=3',
               current: false
             }
           ],
-          previous: { href: '?searchBy=browse&page=1' },
-          next: { href: '?searchBy=browse&page=3' }
+          previous: { href: '?searchBy=email&apply=1&page=1' },
+          next: { href: '?searchBy=email&apply=1&page=3' }
         }
       })
     )
@@ -140,19 +134,19 @@ describe('#searchControllers', () => {
 
   test('omits pagination when there is only one page of results', async () => {
     const h = responseToolkit()
-    searchCphs.mockResolvedValue({ items: [], total: 5 })
+    searchUsers.mockResolvedValue({ items: [], total: 5 })
 
-    await cphSearchController.handler(
+    await userSearchController.handler(
       {
         auth: { credentials: { user: authenticatedUser } },
-        query: { searchBy: 'browse' },
-        url: new URL('http://localhost/cphs?searchBy=browse')
+        query: { searchBy: 'email', apply: '1' },
+        url: new URL('http://localhost/users?searchBy=email&apply=1')
       },
       h
     )
 
     expect(h.view).toHaveBeenCalledWith(
-      'search/cphs',
+      'search/users',
       expect.objectContaining({ pagination: null })
     )
   })
@@ -161,25 +155,6 @@ describe('#searchControllers', () => {
 describe('#detailsControllers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-  })
-
-  test('renders CPH details when the CPH is found', async () => {
-    const h = responseToolkit()
-    getCph.mockResolvedValue({ cph: '12/345/6789' })
-
-    await cphDetailsController.handler(
-      {
-        auth: { credentials: { user: authenticatedUser } },
-        params: { id: '12/345/6789' }
-      },
-      h
-    )
-
-    expect(getCph).toHaveBeenCalledWith('12/345/6789')
-    expect(h.view).toHaveBeenCalledWith('search/cph-details', {
-      pageTitle: '12/345/6789',
-      item: { cph: '12/345/6789' }
-    })
   })
 
   test('renders user details when the user is found', async () => {
@@ -201,11 +176,11 @@ describe('#detailsControllers', () => {
     })
   })
 
-  test('renders a not-found page when the CPH does not exist', async () => {
+  test('renders a not-found page when the user does not exist', async () => {
     const h = { view: vi.fn(() => h), code: vi.fn(() => h) }
-    getCph.mockResolvedValue(undefined)
+    getUser.mockResolvedValue(undefined)
 
-    await cphDetailsController.handler(
+    await userDetailsController.handler(
       {
         auth: { credentials: { user: authenticatedUser } },
         params: { id: 'unknown' }
@@ -215,7 +190,7 @@ describe('#detailsControllers', () => {
 
     expect(h.view).toHaveBeenCalledWith(
       'search/not-found',
-      expect.objectContaining({ resultName: 'CPH' })
+      expect.objectContaining({ resultName: 'user' })
     )
     expect(h.code).toHaveBeenCalledWith(404)
   })

@@ -73,19 +73,30 @@ describe('#backOfficeServer', () => {
   test('Should redirect unauthenticated search requests to login with the full return URL', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/cphs?searchBy=browse'
+      url: '/holdings?search=Oakfield'
     })
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe(
-      '/auth/login?returnUrl=%2Fcphs%3FsearchBy%3Dbrowse'
+      '/auth/login?returnUrl=%2Fholdings%3Fsearch%3DOakfield'
     )
+  })
+
+  test('Should redirect signed-in users from the root route to holdings search', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/holdings')
   })
 
   test('Should deny signed-in users without back-office access', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/cphs?searchBy=address',
+      url: '/holdings',
       auth: hubAuth([])
     })
 
@@ -95,61 +106,155 @@ describe('#backOfficeServer', () => {
   test('Should allow signed-in users with back-office access', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/cphs?searchBy=address',
+      url: '/holdings',
       auth: hubAuth([PERMISSIONS.backOffice])
     })
 
     expect(response.statusCode).toBe(200)
   })
 
-  test('Should render submitted registration review actions', async () => {
-    const result = await server.render('home/dashboard', {
-      pageTitle: 'Dashboard',
-      authenticatedUser: { firstName: 'Caseworker' },
-      greeting: 'Good morning',
-      actionsToComplete: [
-        {
-          title: 'Review cattle registration REG-MNBX1K8F',
-          description:
-            'Submitted for CPH 10/081/1234 · 2 animals · 11 July 2026',
-          url: '/cattle/register/10/081/1234/bundles/REG-MNBX1K8F'
-        }
-      ],
-      logoutUrl: '/auth/logout'
+  test('Should fall back to the first page for an invalid page number', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=Lavendon&page=abc',
+      auth: hubAuth([PERMISSIONS.backOffice])
     })
 
-    expect(result).toContain('Actions to complete')
-    expect(result).toContain('Review cattle registration REG-MNBX1K8F')
-    expect(result).toContain('Submitted for CPH 10/081/1234')
-    expect(result).toContain(
-      'href="/cattle/register/10/081/1234/bundles/REG-MNBX1K8F"'
-    )
+    expect(response.statusCode).toBe(200)
+    expect(response.payload).toContain('<strong>11</strong> holdings match')
+    expect(response.payload).toContain('href="/cattle/holdings/22/002/0002"')
+    expect(response.payload).not.toContain('Page 1 of')
   })
 
   test.each([
-    [true, true],
-    [false, false]
-  ])(
-    'Should render passport approval only when authorised',
-    async (canApprovePassport, shouldRender) => {
-      const result = await server.render('home/dashboard', {
-        pageTitle: 'Dashboard',
-        authenticatedUser: { firstName: 'Caseworker' },
-        greeting: 'Good morning',
-        actionsToComplete: [],
-        canApprovePassport,
-        logoutUrl: '/auth/logout'
-      })
+    [
+      'Oakfield',
+      '<h2 class="govuk-body"><strong>1</strong> holding matches ‘Oakfield’</h2>'
+    ],
+    [
+      'Lavendon',
+      '<h2 class="govuk-body"><strong>11</strong> holdings match ‘Lavendon’</h2>'
+    ],
+    [
+      '<b>x</b>',
+      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’</h2>'
+    ]
+  ])('Should render the match count for %s', async (search, expected) => {
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${encodeURIComponent(search)}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
 
-      expect(result.includes('Approve a passport')).toBe(shouldRender)
-      expect(result.includes('href="/passports/approve"')).toBe(shouldRender)
-    }
-  )
+    expect(response.payload).toContain(expected)
+    expect(response.payload.match(/<h1[\s>]/g)).toHaveLength(1)
+  })
+
+  test('Should accept a search longer than 100 characters', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${'a'.repeat(150)}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('Should render results as a table with a row header link and no instructions', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=Oakfield',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain('Holdings search results')
+    expect(response.payload).toMatch(
+      /<th scope="row"[^>]*>\s*<a class="govuk-link" href="\/cattle\/holdings\/22\/001\/0001">/
+    )
+    expect(response.payload).not.toContain('You can search using:')
+  })
 
   test.each([
-    ['search/cphs', 'Browse CPHs'],
-    ['search/users', 'Find a user by email']
-  ])('Should render the %s search page', async (view, heading) => {
+    ['Lavendon', 'Showing 11 results'],
+    ['Oakfield', 'Showing 1 result']
+  ])('Should render the results summary for %s', async (search, expected) => {
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${search}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain(expected)
+  })
+
+  test('Should not render a table when nothing matches', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=zzzznomatch',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).not.toContain('<table')
+    expect(response.payload).not.toContain('Holdings search results')
+  })
+
+  test('Should not render sort links', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings?search=Lavendon',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).not.toContain('lis-sortable-table__link')
+    expect(response.payload).not.toContain('aria-sort')
+  })
+
+  test('Should render pagination without sort parameters', async () => {
+    const result = await server.render('holdings/holdings', {
+      pageTitle: 'Page 2 of 3 - Find a holding',
+      search: 'farm',
+      searched: true,
+      total: 60,
+      results: [
+        {
+          cph: '22/001/0001',
+          href: '/cattle/holdings/22/001/0001',
+          location: 'Oakfield Farm',
+          status: 'Active'
+        }
+      ],
+      pagination: {
+        currentPage: 2,
+        totalPages: 3,
+        totalItems: 60,
+        itemsPerPage: 25
+      }
+    })
+    const hrefs = [...result.matchAll(/href="([^"]*)"/g)].map(([, href]) =>
+      href.replaceAll('&amp;', '&')
+    )
+
+    expect(result).toContain('Showing 26 to 50 of 60 results')
+    expect(result).toContain('govuk-pagination__prev')
+    expect(result).toContain('govuk-pagination__next')
+    expect(hrefs).toContain('/holdings?search=farm&page=3')
+    expect(hrefs.join(' ')).not.toMatch(/sort=|direction=/)
+  })
+
+  test('Should render the search instructions before a search', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain('You can search using:')
+    expect(response.payload).not.toContain('Clear search')
+  })
+
+  test('Should render the search/users search page', async () => {
+    const view = 'search/users'
+    const heading = 'Find a user by email'
     const result = await server.render(view, {
       pageTitle: heading,
       heading,

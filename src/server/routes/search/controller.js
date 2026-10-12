@@ -1,37 +1,7 @@
-import {
-  getCph,
-  getUser,
-  PAGE_SIZE,
-  searchCphs,
-  searchUsers
-} from '#server/services/search.js'
+import { getUser, PAGE_SIZE, searchUsers } from '#server/services/search.js'
 
 const notFoundStatusCode = 404
 const minimumPageCountForPagination = 2
-
-const cphSearchTypes = {
-  address: {
-    heading: 'Find a CPH by address',
-    sort: 'postcode-ascending',
-    fields: [
-      { name: 'address', label: 'Address' },
-      { name: 'postcode', label: 'Postcode', width: 10 }
-    ]
-  },
-  person: {
-    heading: 'Find a CPH by person name',
-    sort: 'person-name-ascending',
-    fields: [
-      { name: 'firstName', label: 'First name', width: 20 },
-      { name: 'lastName', label: 'Last name', width: 20 }
-    ]
-  },
-  browse: {
-    heading: 'Browse CPHs',
-    sort: 'cph-ascending',
-    fields: []
-  }
-}
 
 const userSearchTypes = {
   email: {
@@ -54,26 +24,12 @@ const userSearchTypes = {
   }
 }
 
-export const cphSearchController = createSearchController({
-  searchTypes: cphSearchTypes,
-  defaultSearchBy: 'browse',
-  search: searchCphs,
-  view: 'search/cphs',
-  resultName: 'CPHs'
-})
-
 export const userSearchController = createSearchController({
   searchTypes: userSearchTypes,
   defaultSearchBy: 'email',
   search: searchUsers,
   view: 'search/users',
   resultName: 'users'
-})
-
-export const cphDetailsController = createDetailsController({
-  load: getCph,
-  view: 'search/cph-details',
-  resultName: 'CPH'
 })
 
 export const userDetailsController = createDetailsController({
@@ -90,7 +46,7 @@ function createSearchController(options) {
         : options.defaultSearchBy
       const searchType = options.searchTypes[searchBy]
       const page = positiveInteger(request.query.page)
-      const applied = request.query.apply === '1' || searchBy === 'browse'
+      const applied = request.query.apply === '1'
       const filters = Object.fromEntries(
         searchType.fields.map(({ name }) => [name, clean(request.query[name])])
       )
