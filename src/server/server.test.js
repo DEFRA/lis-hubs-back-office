@@ -127,9 +127,18 @@ describe('#backOfficeServer', () => {
   })
 
   test.each([
-    ['Oakfield', '<strong>1</strong> holding matches ‘Oakfield’'],
-    ['Lavendon', '<strong>11</strong> holdings match ‘Lavendon’'],
-    ['<b>x</b>', '<strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’']
+    [
+      'Oakfield',
+      '<h2 class="govuk-body"><strong>1</strong> holding matches ‘Oakfield’</h2>'
+    ],
+    [
+      'Lavendon',
+      '<h2 class="govuk-body"><strong>11</strong> holdings match ‘Lavendon’</h2>'
+    ],
+    [
+      '<b>x</b>',
+      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’</h2>'
+    ]
   ])('Should render the match count for %s', async (search, expected) => {
     const response = await server.inject({
       method: 'GET',

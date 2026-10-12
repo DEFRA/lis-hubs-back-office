@@ -41,7 +41,7 @@
           <li>postcode, for example SY4 1AB</li>
         </ul>
       {% else %}
-        <p class="govuk-body"><strong>{{ total }}</strong> {% if total == 1 %}holding matches{% else %}holdings match{% endif %} ‘{{ search }}’</p>
+        <h2 class="govuk-body"><strong>{{ total }}</strong> {% if total == 1 %}holding matches{% else %}holdings match{% endif %} ‘{{ search }}’</h2>
         <p class="govuk-body"><a class="govuk-link" href="/holdings">Clear search</a></p>
       {% endif %}
     </div>
