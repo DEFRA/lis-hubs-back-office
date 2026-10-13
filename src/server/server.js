@@ -24,7 +24,6 @@ import { auth } from '#server/routes/auth/index.js'
 import { health } from '#server/routes/health/index.js'
 import { holdings } from '#server/routes/holdings/index.js'
 import { home } from '#server/routes/home/index.js'
-import { search } from '#server/routes/search/index.js'
 
 const serviceName = 'lis-hubs-back-office'
 
@@ -112,7 +111,6 @@ export async function createServer() {
     health.plugin,
     home.plugin,
     holdings.plugin,
-    search.plugin,
     proxy.plugin
   ])
 
