@@ -10,6 +10,7 @@ import {
   requestContext
 } from '@defra/lis-hubs-infra-core'
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
+import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
 import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
 import { createSessionCachePluginForConfig } from '@defra/lis-infra-ui-services/session-cache'
@@ -49,7 +50,8 @@ const { getRequestBasePath } = createBasePathHelpersForConfig({
 const nunjucksConfig = createNunjucksConfig({
   config,
   logger,
-  getRequestBasePath
+  getRequestBasePath,
+  errorPages: { homeHref: '/', getStartedHref: '/holdings' }
 })
 
 /**
@@ -99,6 +101,10 @@ export async function createServer() {
     requestLogger,
     sessionCache,
     nunjucksConfig,
+    createMaintenancePlugin({
+      availableFrom: config.get('maintenance.availableFrom'),
+      healthPath: '/health'
+    }),
     contentSecurityPolicy,
     serveStaticFiles,
     auth.plugin,

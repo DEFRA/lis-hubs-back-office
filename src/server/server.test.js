@@ -10,6 +10,7 @@ import {
   vi
 } from 'vitest'
 
+import { config } from '#config/config.js'
 import { cattleHomeBe4FeClient } from '#server/common/helpers/cattle-home-be4fe-client.js'
 
 vi.mock('#server/common/helpers/cattle-home-be4fe-client.js')
@@ -133,14 +134,69 @@ describe('#backOfficeServer', () => {
     expect(response.headers.location).toBe('/holdings')
   })
 
-  test('Should deny signed-in users without back-office access', async () => {
-    const response = await server.inject({
+  test('Should sign out signed-in users without back-office access and send them to the not authorised page', async () => {
+    // Arrange
+    const request = {
       method: 'GET',
       url: '/holdings',
       auth: hubAuth([])
-    })
+    }
 
+    // Act
+    const response = await server.inject(request)
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/auth/not-authorised')
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
+    )
+    expect(response.headers['set-cookie'].join(' ')).toContain('Max-Age=0')
+  })
+
+  test('Should render the not authorised page with a sign in link', async () => {
+    // Arrange
+    const request = {
+      method: 'GET',
+      url: '/auth/not-authorised'
+    }
+
+    // Act
+    const response = await server.inject(request)
+
+    // Assert
     expect(response.statusCode).toBe(403)
+    expect(response.payload).toContain(
+      'Sorry, you are not authorised to view this page.'
+    )
+    expect(response.payload).toMatch(
+      /<a href="\/auth\/login"[^>]*class="govuk-button"[^>]*>\s*Sign in\s*<\/a>/
+    )
+  })
+
+  test('Should render the page not found page with the back-office links for an unknown path', async () => {
+    // Arrange
+    const request = {
+      method: 'GET',
+      url: '/no-such-page',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    }
+
+    // Act
+    const response = await server.inject(request)
+
+    // Assert
+    expect(response.statusCode).toBe(404)
+    expect(response.payload).toContain('Page not found')
+    expect(response.payload).toContain(
+      '<a class="govuk-link" href="/">Home page</a>'
+    )
+    expect(response.payload).toContain(
+      '<a class="govuk-link" href="/holdings">Get started</a>'
+    )
+    expect(response.payload).toContain(
+      'href="https://www.gov.uk/government/organisations/british-cattle-movement-service"'
+    )
   })
 
   test('Should allow signed-in users with back-office access', async () => {
@@ -286,11 +342,11 @@ describe('#backOfficeServer', () => {
   })
 
   test.each([
-    ['a 503', 503, 503],
-    ['no', undefined, 500]
+    ['a 503', 503, 503, 'Sorry, the service is unavailable'],
+    ['no', undefined, 500, 'Sorry, there is a problem with the service']
   ])(
-    'Should render the generic error page when the BE4FE fails with %s status code',
-    async (_label, statusCode, expectedStatusCode) => {
+    'Should render the error page when the BE4FE fails with %s status code',
+    async (_label, statusCode, expectedStatusCode, expectedHeading) => {
       const unavailable = new Error('be4fe down')
       unavailable.statusCode = statusCode
       mocks.searchHoldings.mockRejectedValueOnce(unavailable)
@@ -302,7 +358,7 @@ describe('#backOfficeServer', () => {
       })
 
       expect(response.statusCode).toBe(expectedStatusCode)
-      expect(response.payload).toContain('Something went wrong')
+      expect(response.payload).toContain(expectedHeading)
       expect(response.payload).not.toContain('be4fe down')
     }
   )
@@ -380,5 +436,70 @@ describe('#backOfficeServer', () => {
 
     expect(result).toContain(heading)
     expect(result).toContain('method="get"')
+  })
+
+  describe('in maintenance', () => {
+    let maintenanceServer
+
+    beforeAll(async () => {
+      config.set('maintenance.availableFrom', '2026-11-19T09:00')
+      maintenanceServer = await createServer()
+      await maintenanceServer.initialize()
+    })
+
+    afterAll(async () => {
+      config.set('maintenance.availableFrom', '')
+      await maintenanceServer?.stop({ timeout: 0 })
+    })
+
+    test('Should answer pages with the service unavailable page', async () => {
+      // Arrange
+      const request = {
+        method: 'GET',
+        url: '/holdings',
+        auth: hubAuth([PERMISSIONS.backOffice])
+      }
+
+      // Act
+      const response = await maintenanceServer.inject(request)
+
+      // Assert
+      expect(response.statusCode).toBe(503)
+      expect(response.payload).toContain('Sorry, the service is unavailable')
+      expect(response.payload).toContain('9am on Thursday 19 November 2026')
+      expect(response.headers['retry-after']).toBeDefined()
+      expect(mocks.searchHoldings).not.toHaveBeenCalled()
+    })
+
+    test('Should keep the health check up', async () => {
+      // Arrange
+      const request = {
+        method: 'GET',
+        url: '/health'
+      }
+
+      // Act
+      const response = await maintenanceServer.inject(request)
+
+      // Assert
+      expect(response.statusCode).toBe(200)
+    })
+  })
+
+  test('Should not answer with the service unavailable page when not in maintenance', async () => {
+    // Arrange
+    const request = {
+      method: 'GET',
+      url: '/holdings',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    }
+
+    // Act
+    const response = await server.inject(request)
+
+    // Assert
+    expect(response.statusCode).toBe(200)
+    expect(response.payload).not.toContain('Sorry, the service is unavailable')
+    expect(response.headers['retry-after']).toBeUndefined()
   })
 })

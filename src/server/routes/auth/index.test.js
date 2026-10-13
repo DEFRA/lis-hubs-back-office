@@ -1,5 +1,8 @@
 import hapi from '@hapi/hapi'
-import { verifyHubJwt } from '@defra/lis-hubs-infra-access/authentication'
+import {
+  HUB_AUTH_STRATEGY,
+  verifyHubJwt
+} from '@defra/lis-hubs-infra-access/authentication'
 import { PERMISSIONS } from '@defra/lis-hubs-infra-access/authorization'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -193,6 +196,49 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(authorizeBackOfficeAccess(user, { path: '/cphs' })).toBe(true)
     expect(warn).not.toHaveBeenCalled()
+  })
+
+  test('Should sign out a signed-in user without back-office access to the not authorised page', async () => {
+    // Arrange
+    const clearSession = vi.fn()
+    buildLogoutUrl.mockResolvedValueOnce(
+      'https://entra.example.test/logout?post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A3102%2Fauth%2Fnot-authorised'
+    )
+    const server = await createTestServer()
+    server.ext('onRequest', (request, h) => {
+      request.yar = { get: vi.fn(), set: vi.fn(), clear: clearSession }
+      return h.continue
+    })
+    server.route({
+      method: 'GET',
+      path: '/holdings',
+      handler: () => 'holdings'
+    })
+
+    // Act
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings',
+      auth: {
+        strategy: HUB_AUTH_STRATEGY,
+        credentials: { user: { sub: 'test-user', statements: [] } }
+      }
+    })
+    await server.stop({ timeout: 0 })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe(
+      'https://entra.example.test/logout?post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A3102%2Fauth%2Fnot-authorised'
+    )
+    expect(buildLogoutUrl).toHaveBeenCalledWith(expect.any(Object), {
+      authSession: null,
+      returnPath: '/auth/not-authorised'
+    })
+    expect(clearSession).toHaveBeenCalledWith('hub-auth-session')
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
+    )
   })
 
   test('Should refuse and log users without back-office access', () => {
