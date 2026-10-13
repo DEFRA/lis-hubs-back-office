@@ -70,6 +70,7 @@ export function authorizeBackOfficeAccess(user, request) {
 }
 
 export const auth = createHubAuth({
+  hubId: 'back-office',
   getHubJwtCookieName,
   getCookieOptions,
   getHubJwtConfig,
