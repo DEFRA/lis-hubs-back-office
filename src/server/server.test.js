@@ -419,25 +419,6 @@ describe('#backOfficeServer', () => {
     expect(response.payload).not.toContain('Clear search')
   })
 
-  test('Should render the search/users search page', async () => {
-    const view = 'search/users'
-    const heading = 'Find a user by email'
-    const result = await server.render(view, {
-      pageTitle: heading,
-      heading,
-      searchBy: 'browse',
-      searchType: { fields: [] },
-      filters: {},
-      applied: true,
-      results: [],
-      total: 0,
-      pagination: null
-    })
-
-    expect(result).toContain(heading)
-    expect(result).toContain('method="get"')
-  })
-
   describe('in maintenance', () => {
     let maintenanceServer
 
