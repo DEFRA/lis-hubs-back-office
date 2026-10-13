@@ -11,39 +11,32 @@ const mocks = {
 }
 
 const holding = {
-  identifier: '22/003/0003',
+  cph: '22/003/0003',
   name: null,
-  endDate: null,
-  location: {
-    address: {
-      postTown: 'Lavendon',
-      locality: 'Buckinghamshire',
-      postcode: 'MK1 1AB'
-    }
-  },
-  marks: [{ mark: 'UK 324788' }]
+  holding_type: 'Agricultural Holding',
+  address: ['Lavendon', 'Buckinghamshire', 'MK1 1AB'],
+  keeper_name: 'A Keeper'
 }
 
 const emptyResult = {
-  values: [],
   count: 0,
-  totalCount: 0,
+  total_count: 0,
+  items: [],
   page: 1,
-  pageSize: 25,
-  totalPages: 0,
-  hasNextPage: false,
-  hasPreviousPage: false,
-  nextCursor: null
+  page_size: 25,
+  total_pages: 0,
+  has_next_page: false,
+  has_previous_page: false
 }
 
-function envelope(values, { totalCount = values.length, page = 1 } = {}) {
+function envelope(items, { totalCount = items.length, page = 1 } = {}) {
   return {
     ...emptyResult,
-    values,
-    count: values.length,
-    totalCount,
+    items,
+    count: items.length,
+    total_count: totalCount,
     page,
-    totalPages: Math.ceil(totalCount / 25)
+    total_pages: Math.ceil(totalCount / 25)
   }
 }
 
@@ -87,9 +80,9 @@ describe('holdingsController', () => {
         holding,
         {
           ...holding,
-          identifier: '22/001/0001',
+          cph: '22/001/0001',
           name: 'Oakfield Farm',
-          endDate: '2020-06-30T00:00:00Z'
+          address: ['Oakfield Farm', '', null, 'Lavendon', 'MK1 1AB']
         }
       ])
     )
@@ -129,42 +122,39 @@ describe('holdingsController', () => {
           {
             cph: '22/001/0001',
             href: '/cattle/holdings/22/001/0001',
-            location: 'Oakfield Farm, Lavendon, Buckinghamshire, MK1 1AB',
-            status: 'Closed'
+            location: 'Oakfield Farm, Lavendon, MK1 1AB',
+            status: 'Active'
           }
         ]
       })
     )
   })
 
-  test.each([
-    ['null end date', null, 'Active'],
-    ['past end date', '2026-10-11T00:00:00Z', 'Closed'],
-    ['future end date', '2026-10-13T00:00:00Z', 'Active']
-  ])('derives the status from a %s', async (_label, endDate, expected) => {
+  test('renders an empty location for a holding with no address lines', async () => {
     // Arrange
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-10-12T12:00:00Z'))
     const h = { view: vi.fn() }
     mocks.searchHoldings.mockResolvedValueOnce(
-      envelope([{ ...holding, endDate }])
+      envelope([{ ...holding, address: [] }])
     )
 
     // Act
-    try {
-      await holdingsController.handler(
-        { query: { search: 'Lavendon', page: 1 } },
-        h
-      )
-    } finally {
-      vi.useRealTimers()
-    }
+    await holdingsController.handler(
+      { query: { search: 'Lavendon', page: 1 } },
+      h
+    )
 
     // Assert
     expect(h.view).toHaveBeenCalledWith(
       'holdings/holdings',
       expect.objectContaining({
-        results: [expect.objectContaining({ status: expected })]
+        results: [
+          {
+            cph: '22/003/0003',
+            href: '/cattle/holdings/22/003/0003',
+            location: '',
+            status: 'Active'
+          }
+        ]
       })
     )
   })
@@ -244,6 +234,99 @@ describe('holdingsController', () => {
           totalItems: 30,
           itemsPerPage: 25
         }
+      })
+    )
+  })
+
+  test('renders the no-match state when the BE4FE rejects the search term', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    const rejected = new Error('400 - Invalid search')
+    rejected.statusCode = 400
+    mocks.searchHoldings.mockRejectedValueOnce(rejected)
+
+    // Act
+    await holdingsController.handler({ query: { search: '///', page: 3 } }, h)
+
+    // Assert
+    expect(mocks.searchHoldings).toHaveBeenCalledTimes(1)
+    expect(h.view).toHaveBeenCalledWith('holdings/holdings', {
+      pageTitle: 'Find a holding',
+      search: '///',
+      searched: true,
+      results: [],
+      total: 0,
+      pagination: null
+    })
+  })
+
+  test.each([
+    ['a 503', 503],
+    ['no', undefined]
+  ])(
+    'propagates a BE4FE error with %s status code',
+    async (_label, statusCode) => {
+      // Arrange
+      const h = { view: vi.fn() }
+      const unavailable = new Error('be4fe down')
+      unavailable.statusCode = statusCode
+      mocks.searchHoldings.mockRejectedValueOnce(unavailable)
+
+      // Act
+      let error
+      try {
+        await holdingsController.handler(
+          { query: { search: 'Farm', page: 1 } },
+          h
+        )
+      } catch (e) {
+        error = e
+      }
+
+      // Assert
+      expect(error).toBe(unavailable)
+      expect(h.view).not.toHaveBeenCalled()
+    }
+  )
+
+  test('does not request the last page when nothing matches', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+
+    // Act
+    await holdingsController.handler({ query: { search: 'Farm', page: 9 } }, h)
+
+    // Assert
+    expect(mocks.searchHoldings).toHaveBeenCalledTimes(1)
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        pageTitle: 'Find a holding',
+        results: [],
+        total: 0,
+        pagination: null
+      })
+    )
+  })
+
+  test('renders an empty location for a holding with no address', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    mocks.searchHoldings.mockResolvedValueOnce(
+      envelope([{ ...holding, address: null }])
+    )
+
+    // Act
+    await holdingsController.handler(
+      { query: { search: 'Lavendon', page: 1 } },
+      h
+    )
+
+    // Assert
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        results: [expect.objectContaining({ location: '' })]
       })
     )
   })

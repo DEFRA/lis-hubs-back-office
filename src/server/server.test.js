@@ -1,6 +1,41 @@
 import { HUB_AUTH_STRATEGY } from '@defra/lis-hubs-infra-access/authentication'
 import { PERMISSIONS } from '@defra/lis-hubs-infra-access/authorization'
-import { afterAll, beforeAll, describe, expect, test } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi
+} from 'vitest'
+
+import { cattleHomeBe4FeClient } from '#server/common/helpers/cattle-home-be4fe-client.js'
+
+vi.mock('#server/common/helpers/cattle-home-be4fe-client.js')
+
+const mocks = {
+  searchHoldings: vi.mocked(cattleHomeBe4FeClient.searchHoldings)
+}
+
+function holdingsPage(cphs, totalCount = cphs.length) {
+  return {
+    count: cphs.length,
+    total_count: totalCount,
+    items: cphs.map((cph) => ({
+      cph,
+      name: null,
+      holding_type: null,
+      address: ['Oakfield Farm', 'Lavendon', 'MK1 1AB'],
+      keeper_name: null
+    })),
+    page: 1,
+    page_size: 25,
+    total_pages: Math.ceil(totalCount / 25),
+    has_next_page: totalCount > 25,
+    has_previous_page: false
+  }
+}
 
 function hubAuth(permissions) {
   return {
@@ -21,10 +56,15 @@ describe('#backOfficeServer', () => {
   let server
 
   beforeAll(async () => {
+    mocks.searchHoldings.mockResolvedValue(holdingsPage([]))
     process.env.LOG_FORMAT = 'pretty'
     ;({ createServer } = await import('./server.js'))
     server = await createServer()
     await server.initialize()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
   })
 
   afterAll(async () => {
@@ -114,6 +154,10 @@ describe('#backOfficeServer', () => {
   })
 
   test('Should fall back to the first page for an invalid page number', async () => {
+    mocks.searchHoldings.mockResolvedValueOnce(
+      holdingsPage(['22/001/0001', '22/002/0002'], 11)
+    )
+
     const response = await server.inject({
       method: 'GET',
       url: '/holdings?search=Lavendon&page=abc',
@@ -121,6 +165,11 @@ describe('#backOfficeServer', () => {
     })
 
     expect(response.statusCode).toBe(200)
+    expect(mocks.searchHoldings).toHaveBeenCalledWith({
+      search: 'Lavendon',
+      page: 1,
+      pageSize: 25
+    })
     expect(response.payload).toContain('<strong>11</strong> holdings match')
     expect(response.payload).toContain('href="/cattle/holdings/22/002/0002"')
     expect(response.payload).not.toContain('Page 1 of')
@@ -129,26 +178,36 @@ describe('#backOfficeServer', () => {
   test.each([
     [
       'Oakfield',
+      1,
       '<h2 class="govuk-body"><strong>1</strong> holding matches ‘Oakfield’</h2>'
     ],
     [
       'Lavendon',
+      11,
       '<h2 class="govuk-body"><strong>11</strong> holdings match ‘Lavendon’</h2>'
     ],
     [
       '<b>x</b>',
+      0,
       '<h2 class="govuk-body"><strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’</h2>'
     ]
-  ])('Should render the match count for %s', async (search, expected) => {
-    const response = await server.inject({
-      method: 'GET',
-      url: `/holdings?search=${encodeURIComponent(search)}`,
-      auth: hubAuth([PERMISSIONS.backOffice])
-    })
+  ])(
+    'Should render the match count for %s',
+    async (search, total, expected) => {
+      mocks.searchHoldings.mockResolvedValueOnce(
+        holdingsPage(total ? ['22/001/0001'] : [], total)
+      )
 
-    expect(response.payload).toContain(expected)
-    expect(response.payload.match(/<h1[\s>]/g)).toHaveLength(1)
-  })
+      const response = await server.inject({
+        method: 'GET',
+        url: `/holdings?search=${encodeURIComponent(search)}`,
+        auth: hubAuth([PERMISSIONS.backOffice])
+      })
+
+      expect(response.payload).toContain(expected)
+      expect(response.payload.match(/<h1[\s>]/g)).toHaveLength(1)
+    }
+  )
 
   test('Should accept a search longer than 100 characters', async () => {
     const response = await server.inject({
@@ -161,6 +220,8 @@ describe('#backOfficeServer', () => {
   })
 
   test('Should render results as a table with a row header link and no instructions', async () => {
+    mocks.searchHoldings.mockResolvedValueOnce(holdingsPage(['22/001/0001']))
+
     const response = await server.inject({
       method: 'GET',
       url: '/holdings?search=Oakfield',
@@ -175,17 +236,24 @@ describe('#backOfficeServer', () => {
   })
 
   test.each([
-    ['Lavendon', 'Showing 11 results'],
-    ['Oakfield', 'Showing 1 result']
-  ])('Should render the results summary for %s', async (search, expected) => {
-    const response = await server.inject({
-      method: 'GET',
-      url: `/holdings?search=${search}`,
-      auth: hubAuth([PERMISSIONS.backOffice])
-    })
+    ['Lavendon', 11, 'Showing 11 results'],
+    ['Oakfield', 1, 'Showing 1 result']
+  ])(
+    'Should render the results summary for %s',
+    async (search, total, expected) => {
+      mocks.searchHoldings.mockResolvedValueOnce(
+        holdingsPage(['22/001/0001'], total)
+      )
 
-    expect(response.payload).toContain(expected)
-  })
+      const response = await server.inject({
+        method: 'GET',
+        url: `/holdings?search=${search}`,
+        auth: hubAuth([PERMISSIONS.backOffice])
+      })
+
+      expect(response.payload).toContain(expected)
+    }
+  )
 
   test('Should not render a table when nothing matches', async () => {
     const response = await server.inject({
@@ -198,7 +266,50 @@ describe('#backOfficeServer', () => {
     expect(response.payload).not.toContain('Holdings search results')
   })
 
+  test('Should render the no-match state when the BE4FE rejects the search term', async () => {
+    const rejected = new Error('400 - Invalid search')
+    rejected.statusCode = 400
+    mocks.searchHoldings.mockRejectedValueOnce(rejected)
+
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${encodeURIComponent('farm#1')}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.payload).toContain(
+      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘farm#1’</h2>'
+    )
+    expect(response.payload).toContain('Clear search')
+    expect(response.payload).not.toContain('<table')
+  })
+
+  test.each([
+    ['a 503', 503, 503],
+    ['no', undefined, 500]
+  ])(
+    'Should render the generic error page when the BE4FE fails with %s status code',
+    async (_label, statusCode, expectedStatusCode) => {
+      const unavailable = new Error('be4fe down')
+      unavailable.statusCode = statusCode
+      mocks.searchHoldings.mockRejectedValueOnce(unavailable)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/holdings?search=Farm',
+        auth: hubAuth([PERMISSIONS.backOffice])
+      })
+
+      expect(response.statusCode).toBe(expectedStatusCode)
+      expect(response.payload).toContain('Something went wrong')
+      expect(response.payload).not.toContain('be4fe down')
+    }
+  )
+
   test('Should not render sort links', async () => {
+    mocks.searchHoldings.mockResolvedValueOnce(holdingsPage(['22/001/0001']))
+
     const response = await server.inject({
       method: 'GET',
       url: '/holdings?search=Lavendon',

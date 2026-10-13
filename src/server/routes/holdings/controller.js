@@ -4,6 +4,10 @@ import { PAGE_SIZE, searchHoldings } from '#server/services/holdings.js'
 
 const maximumSearchLength = 100
 
+const badRequest = 400
+
+const noMatches = { items: [], total_count: 0, total_pages: 0, page: 1 }
+
 export const holdingsQuerySchema = Joi.object({
   search: Joi.string().trim().max(maximumSearchLength).truncate().allow(''),
   page: Joi.number().integer().min(1).default(1).failover(1)
@@ -19,13 +23,13 @@ export const holdingsController = {
     const search = request.query.search ?? ''
     const searched = search !== ''
     const {
-      values,
-      totalCount: total,
-      totalPages,
+      items,
+      total_count: total,
+      total_pages: totalPages,
       page
     } = searched
       ? await findPage({ search, page: request.query.page })
-      : { values: [], totalCount: 0, totalPages: 0, page: 1 }
+      : noMatches
 
     const pageCount = Math.max(1, totalPages)
 
@@ -36,7 +40,7 @@ export const holdingsController = {
           : 'Find a holding',
       search,
       searched,
-      results: values.map(toRow),
+      results: items.map(toRow),
       total,
       pagination:
         total === 0
@@ -52,8 +56,23 @@ export const holdingsController = {
 }
 
 async function findPage({ search, page }) {
-  const result = await searchHoldings({ search, page, pageSize: PAGE_SIZE })
-  const lastPage = Math.max(1, result.totalPages)
+  let result
+  try {
+    result = await searchHoldings({ search, page, pageSize: PAGE_SIZE })
+  } catch (error) {
+    // The BE4FE rejects terms it cannot search on (e.g. punctuation only);
+    // for the user that is simply a search with no matches.
+    if (error.statusCode === badRequest) {
+      return noMatches
+    }
+    throw error
+  }
+
+  if (result.total_count === 0) {
+    return { ...result, page: 1 }
+  }
+
+  const lastPage = Math.max(1, result.total_pages)
 
   if (page <= lastPage) {
     return { ...result, page }
@@ -68,15 +87,13 @@ async function findPage({ search, page }) {
   return { ...lastPageResult, page: lastPage }
 }
 
-function toRow({ identifier, name, endDate, location: { address } }) {
-  const closed = endDate !== null && new Date(endDate) < new Date()
-
+function toRow({ cph, address }) {
   return {
-    cph: identifier,
-    href: `/cattle/holdings/${identifier}`,
-    location: [name, address.postTown, address.locality, address.postcode]
-      .filter(Boolean)
-      .join(', '),
-    status: closed ? 'Closed' : 'Active'
+    cph,
+    href: `/cattle/holdings/${cph}`,
+    location: (address ?? []).filter(Boolean).join(', '),
+    // TODO: the BE4FE holding response carries no status or end date yet, so
+    // every holding shows as Active until it does.
+    status: 'Active'
   }
 }
