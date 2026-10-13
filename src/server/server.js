@@ -103,7 +103,8 @@ export async function createServer() {
     nunjucksConfig,
     createMaintenancePlugin({
       availableFrom: config.get('maintenance.availableFrom'),
-      healthPath: '/health'
+      healthPath: '/health',
+      assetPath: config.get('assetPath')
     }),
     contentSecurityPolicy,
     serveStaticFiles,
