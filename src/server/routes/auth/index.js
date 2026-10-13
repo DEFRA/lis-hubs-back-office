@@ -50,7 +50,8 @@ function getHubJwtConfig() {
 
 /**
  * Hub-wide rule: every authenticated back-office request needs back-office
- * access. A `false` result is a 403, rendered by the shared error page.
+ * access. A `false` result signs the user out and lands them on the
+ * not-authorised page.
  *
  * @param {object} user
  * @param {object} request

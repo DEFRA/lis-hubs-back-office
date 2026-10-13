@@ -212,6 +212,14 @@ export const config = convict({
       default: isDevelopment
     }
   },
+  maintenance: {
+    availableFrom: {
+      doc: 'When the service is next available, as a UK local date-time without an offset, e.g. 2026-11-19T09:00. Empty means the service is not in maintenance',
+      format: String,
+      default: '',
+      env: 'MAINTENANCE_AVAILABLE_FROM'
+    }
+  },
   cattleHomeApi: {
     apiKey: {
       doc: 'API key sent to the cattle-home BE4FE as x-api-key',
