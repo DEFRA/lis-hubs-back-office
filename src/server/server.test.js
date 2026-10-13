@@ -266,6 +266,47 @@ describe('#backOfficeServer', () => {
     expect(response.payload).not.toContain('Holdings search results')
   })
 
+  test('Should render the no-match state when the BE4FE rejects the search term', async () => {
+    const rejected = new Error('400 - Invalid search')
+    rejected.statusCode = 400
+    mocks.searchHoldings.mockRejectedValueOnce(rejected)
+
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${encodeURIComponent('farm#1')}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.payload).toContain(
+      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘farm#1’</h2>'
+    )
+    expect(response.payload).toContain('Clear search')
+    expect(response.payload).not.toContain('<table')
+  })
+
+  test.each([
+    ['a 503', 503, 503],
+    ['no', undefined, 500]
+  ])(
+    'Should render the generic error page when the BE4FE fails with %s status code',
+    async (_label, statusCode, expectedStatusCode) => {
+      const unavailable = new Error('be4fe down')
+      unavailable.statusCode = statusCode
+      mocks.searchHoldings.mockRejectedValueOnce(unavailable)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/holdings?search=Farm',
+        auth: hubAuth([PERMISSIONS.backOffice])
+      })
+
+      expect(response.statusCode).toBe(expectedStatusCode)
+      expect(response.payload).toContain('Something went wrong')
+      expect(response.payload).not.toContain('be4fe down')
+    }
+  )
+
   test('Should not render sort links', async () => {
     mocks.searchHoldings.mockResolvedValueOnce(holdingsPage(['22/001/0001']))
 

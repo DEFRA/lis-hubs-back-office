@@ -237,6 +237,99 @@ describe('holdingsController', () => {
       })
     )
   })
+
+  test('renders the no-match state when the BE4FE rejects the search term', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    const rejected = new Error('400 - Invalid search')
+    rejected.statusCode = 400
+    mocks.searchHoldings.mockRejectedValueOnce(rejected)
+
+    // Act
+    await holdingsController.handler({ query: { search: '///', page: 3 } }, h)
+
+    // Assert
+    expect(mocks.searchHoldings).toHaveBeenCalledTimes(1)
+    expect(h.view).toHaveBeenCalledWith('holdings/holdings', {
+      pageTitle: 'Find a holding',
+      search: '///',
+      searched: true,
+      results: [],
+      total: 0,
+      pagination: null
+    })
+  })
+
+  test.each([
+    ['a 503', 503],
+    ['no', undefined]
+  ])(
+    'propagates a BE4FE error with %s status code',
+    async (_label, statusCode) => {
+      // Arrange
+      const h = { view: vi.fn() }
+      const unavailable = new Error('be4fe down')
+      unavailable.statusCode = statusCode
+      mocks.searchHoldings.mockRejectedValueOnce(unavailable)
+
+      // Act
+      let error
+      try {
+        await holdingsController.handler(
+          { query: { search: 'Farm', page: 1 } },
+          h
+        )
+      } catch (e) {
+        error = e
+      }
+
+      // Assert
+      expect(error).toBe(unavailable)
+      expect(h.view).not.toHaveBeenCalled()
+    }
+  )
+
+  test('does not request the last page when nothing matches', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+
+    // Act
+    await holdingsController.handler({ query: { search: 'Farm', page: 9 } }, h)
+
+    // Assert
+    expect(mocks.searchHoldings).toHaveBeenCalledTimes(1)
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        pageTitle: 'Find a holding',
+        results: [],
+        total: 0,
+        pagination: null
+      })
+    )
+  })
+
+  test('renders an empty location for a holding with no address', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    mocks.searchHoldings.mockResolvedValueOnce(
+      envelope([{ ...holding, address: null }])
+    )
+
+    // Act
+    await holdingsController.handler(
+      { query: { search: 'Lavendon', page: 1 } },
+      h
+    )
+
+    // Assert
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        results: [expect.objectContaining({ location: '' })]
+      })
+    )
+  })
 })
 
 describe('holdingsQuerySchema', () => {
