@@ -11,39 +11,32 @@ const mocks = {
 }
 
 const holding = {
-  identifier: '22/003/0003',
+  cph: '22/003/0003',
   name: null,
-  endDate: null,
-  location: {
-    address: {
-      postTown: 'Lavendon',
-      locality: 'Buckinghamshire',
-      postcode: 'MK1 1AB'
-    }
-  },
-  marks: [{ mark: 'UK 324788' }]
+  holding_type: 'Agricultural Holding',
+  address: ['Lavendon', 'Buckinghamshire', 'MK1 1AB'],
+  keeper_name: 'A Keeper'
 }
 
 const emptyResult = {
-  values: [],
   count: 0,
-  totalCount: 0,
+  total_count: 0,
+  items: [],
   page: 1,
-  pageSize: 25,
-  totalPages: 0,
-  hasNextPage: false,
-  hasPreviousPage: false,
-  nextCursor: null
+  page_size: 25,
+  total_pages: 0,
+  has_next_page: false,
+  has_previous_page: false
 }
 
-function envelope(values, { totalCount = values.length, page = 1 } = {}) {
+function envelope(items, { totalCount = items.length, page = 1 } = {}) {
   return {
     ...emptyResult,
-    values,
-    count: values.length,
-    totalCount,
+    items,
+    count: items.length,
+    total_count: totalCount,
     page,
-    totalPages: Math.ceil(totalCount / 25)
+    total_pages: Math.ceil(totalCount / 25)
   }
 }
 
@@ -87,9 +80,9 @@ describe('holdingsController', () => {
         holding,
         {
           ...holding,
-          identifier: '22/001/0001',
+          cph: '22/001/0001',
           name: 'Oakfield Farm',
-          endDate: '2020-06-30T00:00:00Z'
+          address: ['Oakfield Farm', '', null, 'Lavendon', 'MK1 1AB']
         }
       ])
     )
@@ -129,42 +122,39 @@ describe('holdingsController', () => {
           {
             cph: '22/001/0001',
             href: '/cattle/holdings/22/001/0001',
-            location: 'Oakfield Farm, Lavendon, Buckinghamshire, MK1 1AB',
-            status: 'Closed'
+            location: 'Oakfield Farm, Lavendon, MK1 1AB',
+            status: 'Active'
           }
         ]
       })
     )
   })
 
-  test.each([
-    ['null end date', null, 'Active'],
-    ['past end date', '2026-10-11T00:00:00Z', 'Closed'],
-    ['future end date', '2026-10-13T00:00:00Z', 'Active']
-  ])('derives the status from a %s', async (_label, endDate, expected) => {
+  test('renders an empty location for a holding with no address lines', async () => {
     // Arrange
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-10-12T12:00:00Z'))
     const h = { view: vi.fn() }
     mocks.searchHoldings.mockResolvedValueOnce(
-      envelope([{ ...holding, endDate }])
+      envelope([{ ...holding, address: [] }])
     )
 
     // Act
-    try {
-      await holdingsController.handler(
-        { query: { search: 'Lavendon', page: 1 } },
-        h
-      )
-    } finally {
-      vi.useRealTimers()
-    }
+    await holdingsController.handler(
+      { query: { search: 'Lavendon', page: 1 } },
+      h
+    )
 
     // Assert
     expect(h.view).toHaveBeenCalledWith(
       'holdings/holdings',
       expect.objectContaining({
-        results: [expect.objectContaining({ status: expected })]
+        results: [
+          {
+            cph: '22/003/0003',
+            href: '/cattle/holdings/22/003/0003',
+            location: '',
+            status: 'Active'
+          }
+        ]
       })
     )
   })
