@@ -276,14 +276,14 @@ describe('#backOfficeServer', () => {
     )
   })
 
-  test('Should limit the search input to 100 characters and link it to the examples hint', async () => {
+  test('Should link the search input to the examples hint', async () => {
     const response = await server.inject({
       method: 'GET',
       url: '/holdings',
       auth: hubAuth([PERMISSIONS.backOffice])
     })
 
-    expect(response.payload).toContain('maxlength="100"')
+    expect(response.payload).not.toContain('maxlength')
     expect(response.payload).toContain(
       'aria-describedby="search-holdings-hint"'
     )

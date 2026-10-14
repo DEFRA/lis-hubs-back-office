@@ -2,14 +2,12 @@ import Joi from 'joi'
 
 import { PAGE_SIZE, searchHoldings } from '#server/services/holdings.js'
 
-const maximumSearchLength = 100
-
 const badRequest = 400
 
 const noMatches = { items: [], total_count: 0, total_pages: 0, page: 1 }
 
 export const holdingsQuerySchema = Joi.object({
-  search: Joi.string().trim().max(maximumSearchLength).truncate().allow(''),
+  search: Joi.string().trim().allow(''),
   page: Joi.number().integer().min(1).default(1).failover(1)
 }).prefs({ stripUnknown: true })
 
