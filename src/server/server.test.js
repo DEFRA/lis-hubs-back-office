@@ -167,14 +167,14 @@ describe('#backOfficeServer', () => {
     // Assert
     expect(response.statusCode).toBe(403)
     expect(response.payload).toContain(
-      'Sorry, you are not authorised to view this page.'
+      '>Sorry, you are not authorised to view this page</h1>'
     )
     expect(response.payload).toMatch(
       /<a href="\/auth\/login"[^>]*class="govuk-button"[^>]*>\s*Sign in\s*<\/a>/
     )
   })
 
-  test('Should render the page not found page with the back-office links for an unknown path', async () => {
+  test('Should render the page not found page for an unknown path', async () => {
     // Arrange
     const request = {
       method: 'GET',
@@ -189,10 +189,7 @@ describe('#backOfficeServer', () => {
     expect(response.statusCode).toBe(404)
     expect(response.payload).toContain('Page not found')
     expect(response.payload).toContain(
-      '<a class="govuk-link" href="/">Home page</a>'
-    )
-    expect(response.payload).toContain(
-      '<a class="govuk-link" href="/holdings">Get started</a>'
+      'If you typed the web address, check it is correct.'
     )
     expect(response.payload).toContain(
       'href="https://www.gov.uk/government/organisations/british-cattle-movement-service"'
@@ -235,17 +232,17 @@ describe('#backOfficeServer', () => {
     [
       'Oakfield',
       1,
-      '<h2 class="govuk-body"><strong>1</strong> holding matches ‘Oakfield’</h2>'
+      '<h2 class="govuk-body govuk-!-text-break-word"><strong>1</strong> holding matches ‘Oakfield’</h2>'
     ],
     [
       'Lavendon',
       11,
-      '<h2 class="govuk-body"><strong>11</strong> holdings match ‘Lavendon’</h2>'
+      '<h2 class="govuk-body govuk-!-text-break-word"><strong>11</strong> holdings match ‘Lavendon’</h2>'
     ],
     [
       '<b>x</b>',
       0,
-      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’</h2>'
+      '<h2 class="govuk-body govuk-!-text-break-word"><strong>0</strong> holdings match ‘&lt;b&gt;x&lt;/b&gt;’</h2>'
     ]
   ])(
     'Should render the match count for %s',
@@ -265,6 +262,35 @@ describe('#backOfficeServer', () => {
     }
   )
 
+  test('Should escape the search term in the page title', async () => {
+    mocks.searchHoldings.mockResolvedValueOnce(holdingsPage([], 0))
+
+    const response = await server.inject({
+      method: 'GET',
+      url: `/holdings?search=${encodeURIComponent('<b>x</b>')}`,
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain(
+      '0 results for ‘&lt;b&gt;x&lt;/b&gt;’ - Find a holding - Livestock Information'
+    )
+  })
+
+  test('Should limit the search input to 100 characters and link it to the examples hint', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/holdings',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    expect(response.payload).toContain('maxlength="100"')
+    expect(response.payload).toContain(
+      'aria-describedby="search-holdings-hint"'
+    )
+    expect(response.payload).toContain('id="search-holdings-hint"')
+    expect(response.payload).toContain('town or county')
+  })
+
   test('Should accept a search longer than 100 characters', async () => {
     const response = await server.inject({
       method: 'GET',
@@ -275,7 +301,7 @@ describe('#backOfficeServer', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  test('Should render results as a table with a row header link and no instructions', async () => {
+  test('Should render results as a table with a row header link', async () => {
     mocks.searchHoldings.mockResolvedValueOnce(holdingsPage(['22/001/0001']))
 
     const response = await server.inject({
@@ -289,6 +315,9 @@ describe('#backOfficeServer', () => {
       /<th scope="row"[^>]*>\s*<a class="govuk-link" href="\/cattle\/holdings\/22\/001\/0001">/
     )
     expect(response.payload).not.toContain('You can search using:')
+    expect(response.payload).not.toContain(
+      'aria-describedby="search-holdings-hint"'
+    )
   })
 
   test.each([
@@ -335,7 +364,7 @@ describe('#backOfficeServer', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.payload).toContain(
-      '<h2 class="govuk-body"><strong>0</strong> holdings match ‘farm#1’</h2>'
+      '<h2 class="govuk-body govuk-!-text-break-word"><strong>0</strong> holdings match ‘farm#1’</h2>'
     )
     expect(response.payload).toContain('Clear search')
     expect(response.payload).not.toContain('<table')

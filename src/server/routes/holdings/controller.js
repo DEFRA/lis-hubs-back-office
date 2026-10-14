@@ -34,10 +34,7 @@ export const holdingsController = {
     const pageCount = Math.max(1, totalPages)
 
     return h.view('holdings/holdings', {
-      pageTitle:
-        pageCount > 1
-          ? `Page ${page} of ${pageCount} - Find a holding`
-          : 'Find a holding',
+      pageTitle: buildPageTitle({ search, total, page, pageCount }),
       search,
       searched,
       results: items.map(toRow),
@@ -53,6 +50,15 @@ export const holdingsController = {
             }
     })
   }
+}
+
+function buildPageTitle({ search, total, page, pageCount }) {
+  const resultsNoun = total === 1 ? 'result' : 'results'
+  const title = search
+    ? `${total} ${resultsNoun} for ‘${search}’ - Find a holding`
+    : 'Find a holding'
+
+  return pageCount > 1 ? `Page ${page} of ${pageCount} - ${title}` : title
 }
 
 async function findPage({ search, page }) {

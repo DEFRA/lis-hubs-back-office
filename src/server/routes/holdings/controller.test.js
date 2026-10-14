@@ -105,7 +105,7 @@ describe('holdingsController', () => {
         search: 'Lavendon',
         searched: true,
         total: 2,
-        pageTitle: 'Find a holding',
+        pageTitle: '2 results for ‘Lavendon’ - Find a holding',
         pagination: {
           currentPage: 1,
           totalPages: 1,
@@ -159,6 +159,26 @@ describe('holdingsController', () => {
     )
   })
 
+  test('uses the singular noun in the page title for one match', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    mocks.searchHoldings.mockResolvedValueOnce(envelope([holding]))
+
+    // Act
+    await holdingsController.handler(
+      { query: { search: 'Lavendon', page: 1 } },
+      h
+    )
+
+    // Assert
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        pageTitle: '1 result for ‘Lavendon’ - Find a holding'
+      })
+    )
+  })
+
   test('renders no rows when nothing matches', async () => {
     // Arrange
     const h = { view: vi.fn() }
@@ -196,7 +216,7 @@ describe('holdingsController', () => {
     expect(h.view).toHaveBeenCalledWith(
       'holdings/holdings',
       expect.objectContaining({
-        pageTitle: 'Page 1 of 2 - Find a holding',
+        pageTitle: 'Page 1 of 2 - 30 results for ‘Old Farm’ - Find a holding',
         pagination: {
           currentPage: 1,
           totalPages: 2,
@@ -226,7 +246,7 @@ describe('holdingsController', () => {
     expect(h.view).toHaveBeenCalledWith(
       'holdings/holdings',
       expect.objectContaining({
-        pageTitle: 'Page 2 of 2 - Find a holding',
+        pageTitle: 'Page 2 of 2 - 30 results for ‘Farm’ - Find a holding',
         results: [expect.objectContaining({ cph: '22/003/0003' })],
         pagination: {
           currentPage: 2,
@@ -251,7 +271,7 @@ describe('holdingsController', () => {
     // Assert
     expect(mocks.searchHoldings).toHaveBeenCalledTimes(1)
     expect(h.view).toHaveBeenCalledWith('holdings/holdings', {
-      pageTitle: 'Find a holding',
+      pageTitle: '0 results for ‘///’ - Find a holding',
       search: '///',
       searched: true,
       results: [],
@@ -301,7 +321,7 @@ describe('holdingsController', () => {
     expect(h.view).toHaveBeenCalledWith(
       'holdings/holdings',
       expect.objectContaining({
-        pageTitle: 'Find a holding',
+        pageTitle: '0 results for ‘Farm’ - Find a holding',
         results: [],
         total: 0,
         pagination: null
