@@ -167,14 +167,14 @@ describe('#backOfficeServer', () => {
     // Assert
     expect(response.statusCode).toBe(403)
     expect(response.payload).toContain(
-      'Sorry, you are not authorised to view this page.'
+      '>Sorry, you are not authorised to view this page</h1>'
     )
     expect(response.payload).toMatch(
       /<a href="\/auth\/login"[^>]*class="govuk-button"[^>]*>\s*Sign in\s*<\/a>/
     )
   })
 
-  test('Should render the page not found page with the back-office links for an unknown path', async () => {
+  test('Should render the page not found page for an unknown path', async () => {
     // Arrange
     const request = {
       method: 'GET',
@@ -189,10 +189,7 @@ describe('#backOfficeServer', () => {
     expect(response.statusCode).toBe(404)
     expect(response.payload).toContain('Page not found')
     expect(response.payload).toContain(
-      '<a class="govuk-link" href="/">Home page</a>'
-    )
-    expect(response.payload).toContain(
-      '<a class="govuk-link" href="/holdings">Get started</a>'
+      'If you typed the web address, check it is correct.'
     )
     expect(response.payload).toContain(
       'href="https://www.gov.uk/government/organisations/british-cattle-movement-service"'

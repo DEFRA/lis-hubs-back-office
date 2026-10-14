@@ -34,10 +34,10 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@defra/lis-hubs-infra-access": "^0.30.0",
+    "@defra/lis-hubs-infra-access": "^0.31.0",
     "@defra/lis-hubs-infra-core": "^0.15.0",
     "@defra/lis-hubs-infra-registry": "^0.5.0",
-    "@defra/lis-infra-ui-services": "^0.24.0",
+    "@defra/lis-infra-ui-services": "^0.25.0",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.4.8",
     "@hapi/inert": "7.1.2",
@@ -45,7 +45,7 @@
     "blankie": "5.0.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0",
-    "govuk-frontend": "6.1.0",
+    "govuk-frontend": "6.5.0",
     "joi": "18.2.5"
   },
   "devDependencies": {

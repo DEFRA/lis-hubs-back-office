@@ -49,8 +49,7 @@ const { getRequestBasePath } = createBasePathHelpersForConfig({
 const nunjucksConfig = createNunjucksConfig({
   config,
   logger,
-  getRequestBasePath,
-  errorPages: { homeHref: '/', getStartedHref: '/holdings' }
+  getRequestBasePath
 })
 
 /**
