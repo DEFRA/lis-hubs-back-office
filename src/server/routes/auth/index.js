@@ -34,8 +34,7 @@ function getHubJwtCookieName() {
 
 function getCookieOptions() {
   return createHubCookieOptions({
-    ttlSeconds: config.get('auth.hubJwt.ttlSeconds'),
-    isSecure: config.get('session.cookie.secure')
+    ttlSeconds: config.get('auth.hubJwt.ttlSeconds')
   })
 }
 

@@ -67,6 +67,13 @@ export default defineConfig(({ mode }) => {
       hmr: {
         port: 0
       }
+    },
+    test: {
+      include: ['src/**/*.test.js'],
+      env: {
+        HUB_JWT_SECRET: 'test-hub-jwt-secret',
+        SESSION_COOKIE_PASSWORD: 'test-session-cookie-password-0123456789'
+      }
     }
   }
 })

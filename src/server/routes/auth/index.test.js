@@ -60,8 +60,7 @@ function createConfigValueMap() {
     'auth.hubJwt.secret': jwtConfig.secret,
     'auth.hubJwt.issuer': jwtConfig.issuer,
     'auth.hubJwt.audience': jwtConfig.audience,
-    'auth.hubJwt.ttlSeconds': 14400,
-    'session.cookie.secure': false
+    'auth.hubJwt.ttlSeconds': 14400
   }
 }
 
