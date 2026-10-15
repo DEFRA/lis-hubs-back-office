@@ -134,7 +134,7 @@ describe('#backOfficeServer', () => {
     expect(response.headers.location).toBe('/holdings')
   })
 
-  test('Should sign out signed-in users without back-office access and send them to the not authorised page', async () => {
+  test('Should send signed-in users without back-office access to the not authorised page', async () => {
     // Arrange
     const request = {
       method: 'GET',
@@ -152,6 +152,28 @@ describe('#backOfficeServer', () => {
       expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
     )
     expect(response.headers['set-cookie'].join(' ')).toContain('Max-Age=0')
+  })
+
+  test('Should render the not authorised page with a sign out button for a signed-in user', async () => {
+    // Arrange
+    const request = {
+      method: 'GET',
+      url: '/auth/not-authorised',
+      auth: hubAuth([])
+    }
+
+    // Act
+    const response = await server.inject(request)
+
+    // Assert
+    expect(response.statusCode).toBe(403)
+    expect(response.payload).toContain(
+      '>Sorry, you are not authorised to view this page</h1>'
+    )
+    expect(response.payload).toMatch(
+      /<a href="\/signout"[^>]*class="govuk-button"[^>]*>\s*Sign out\s*<\/a>/
+    )
+    expect(response.payload).not.toContain('Sign in')
   })
 
   test('Should render the not authorised page with a sign in link', async () => {
