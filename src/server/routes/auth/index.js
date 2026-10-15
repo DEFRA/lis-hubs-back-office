@@ -50,8 +50,8 @@ function getHubJwtConfig() {
 
 /**
  * Hub-wide rule: every authenticated back-office request needs back-office
- * access. A `false` result signs the user out and lands them on the
- * not-authorised page.
+ * access. A `false` result keeps the user signed in but sends them to the
+ * not-authorised page with no spoke JWT.
  *
  * @param {object} user
  * @param {object} request
