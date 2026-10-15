@@ -91,13 +91,11 @@ async function findPage({ search, page }) {
   return { ...lastPageResult, page: lastPage }
 }
 
-function toRow({ cph, address }) {
+function toRow({ cph, address, active }) {
   return {
     cph,
     href: `/cattle/holdings/${cph}`,
     location: (address ?? []).filter(Boolean).join(', '),
-    // TODO: the BE4FE holding response carries no status or end date yet, so
-    // every holding shows as Active until it does.
-    status: 'Active'
+    status: active === false ? 'Inactive' : 'Active'
   }
 }

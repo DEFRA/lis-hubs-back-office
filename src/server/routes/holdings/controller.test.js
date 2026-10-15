@@ -15,7 +15,10 @@ const holding = {
   name: null,
   holding_type: 'Agricultural Holding',
   address: ['Lavendon', 'Buckinghamshire', 'MK1 1AB'],
-  keeper_name: 'A Keeper'
+  keeper_name: 'A Keeper',
+  start_date: '2005-01-01T00:00:00+00:00',
+  end_date: null,
+  active: true
 }
 
 const emptyResult = {
@@ -169,6 +172,42 @@ describe('holdingsController', () => {
             href: '/cattle/holdings/22/003/0003',
             location: '',
             status: 'Active'
+          }
+        ]
+      })
+    )
+  })
+
+  test('shows Inactive for a holding BE4FE reports as not active', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    mocks.searchHoldings.mockResolvedValueOnce(
+      envelope([
+        {
+          ...holding,
+          cph: '22/008/0008',
+          end_date: '2020-06-30T00:00:00+00:00',
+          active: false
+        }
+      ])
+    )
+
+    // Act
+    await holdingsController.handler(
+      { query: { search: '22/008', page: 1 } },
+      h
+    )
+
+    // Assert
+    expect(h.view).toHaveBeenCalledWith(
+      'holdings/holdings',
+      expect.objectContaining({
+        results: [
+          {
+            cph: '22/008/0008',
+            href: '/cattle/holdings/22/008/0008',
+            location: 'Lavendon, Buckinghamshire, MK1 1AB',
+            status: 'Inactive'
           }
         ]
       })
