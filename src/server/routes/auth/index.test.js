@@ -198,12 +198,9 @@ describe('#backOfficeAuthRoutes', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 
-  test('Should sign out a signed-in user without back-office access to the not authorised page', async () => {
+  test('Should send a signed-in user without back-office access to the not authorised page without signing them out', async () => {
     // Arrange
     const clearSession = vi.fn()
-    buildLogoutUrl.mockResolvedValueOnce(
-      'https://entra.example.test/logout?post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A3102%2Fauth%2Fnot-authorised'
-    )
     const server = await createTestServer()
     server.ext('onRequest', (request, h) => {
       request.yar = { get: vi.fn(), set: vi.fn(), clear: clearSession }
@@ -228,14 +225,9 @@ describe('#backOfficeAuthRoutes', () => {
 
     // Assert
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe(
-      'https://entra.example.test/logout?post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A3102%2Fauth%2Fnot-authorised'
-    )
-    expect(buildLogoutUrl).toHaveBeenCalledWith(expect.any(Object), {
-      authSession: null,
-      returnPath: '/auth/not-authorised'
-    })
-    expect(clearSession).toHaveBeenCalledWith('hub-auth-session')
+    expect(response.headers.location).toBe('/auth/not-authorised')
+    expect(buildLogoutUrl).not.toHaveBeenCalled()
+    expect(clearSession).not.toHaveBeenCalled()
     expect(response.headers['set-cookie']).toEqual(
       expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
     )
