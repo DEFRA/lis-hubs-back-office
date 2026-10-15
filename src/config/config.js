@@ -143,15 +143,9 @@ export const config = convict({
       password: {
         doc: 'Session cookie password',
         format: String,
-        default: 'the-password-must-be-at-least-32-characters-long',
+        default: null,
         env: 'SESSION_COOKIE_PASSWORD',
         sensitive: true
-      },
-      secure: {
-        doc: 'Set secure flag on session cookie',
-        format: Boolean,
-        default: false,
-        env: 'SESSION_COOKIE_SECURE'
       }
     }
   },
@@ -258,7 +252,7 @@ export const config = convict({
       secret: {
         doc: 'Shared secret used to sign and verify hub-issued JWTs',
         format: String,
-        default: 'local-dev-hub-jwt-signing-secret-please-change-1234567890',
+        default: null,
         env: 'HUB_JWT_SECRET',
         sensitive: true
       },
