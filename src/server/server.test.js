@@ -218,6 +218,25 @@ describe('#backOfficeServer', () => {
     )
   })
 
+  test('Should keep the hardening headers on the swapped error response', async () => {
+    // Act
+    const response = await server.inject({
+      method: 'GET',
+      url: '/no-such-page',
+      auth: hubAuth([PERMISSIONS.backOffice])
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(404)
+    expect(response.headers['content-security-policy']).toContain(
+      "default-src 'self'"
+    )
+    expect(response.headers['x-content-type-options']).toBe('nosniff')
+    expect(response.headers['strict-transport-security']).toBeDefined()
+    expect(response.headers['referrer-policy']).toBeDefined()
+    expect(response.headers['permissions-policy']).toBeDefined()
+  })
+
   test('Should allow signed-in users with back-office access', async () => {
     const response = await server.inject({
       method: 'GET',
