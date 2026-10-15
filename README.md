@@ -36,3 +36,12 @@ Remaining work:
 
 - add back-office-specific operational modules and capability views
 - add the remaining deployment packaging and environment conventions needed for standalone hosting
+
+## Required environment variables
+
+The following have no default and the service will not start without them:
+
+- `HUB_JWT_SECRET` — signs the hub-issued JWT
+- `SESSION_COOKIE_PASSWORD` — encrypts the session cookie (minimum 32 characters)
+
+Set both as secrets in every deployed environment via the CDP Portal.
