@@ -49,6 +49,22 @@ describe('holdingsController', () => {
     vi.clearAllMocks()
   })
 
+  test('passes a 150-character search term to the BE4FE search in full', async () => {
+    // Arrange
+    const h = { view: vi.fn() }
+    const search = 'a'.repeat(150)
+
+    // Act
+    await holdingsController.handler({ query: { search, page: 1 } }, h)
+
+    // Assert
+    expect(mocks.searchHoldings).toHaveBeenCalledWith({
+      search,
+      page: 1,
+      pageSize: 25
+    })
+  })
+
   test('renders only the form when there is no search term', async () => {
     // Arrange
     const h = { view: vi.fn(() => 'rendered') }
@@ -385,7 +401,7 @@ describe('holdingsQuerySchema', () => {
     expect(value).toEqual(expected)
   })
 
-  test('truncates a search term longer than 100 characters', () => {
+  test('keeps a search term longer than 100 characters in full', () => {
     // Act
     const { value, error } = holdingsQuerySchema.validate({
       search: 'a'.repeat(150)
@@ -393,6 +409,6 @@ describe('holdingsQuerySchema', () => {
 
     // Assert
     expect(error).toBeUndefined()
-    expect(value.search).toBe('a'.repeat(100))
+    expect(value.search).toBe('a'.repeat(150))
   })
 })
