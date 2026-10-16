@@ -298,7 +298,7 @@ describe('#backOfficeServer', () => {
     )
   })
 
-  test('Should link the search input to the examples hint', async () => {
+  test('Should label the search input and show the examples below the search box', async () => {
     const response = await server.inject({
       method: 'GET',
       url: '/holdings',
@@ -307,10 +307,13 @@ describe('#backOfficeServer', () => {
 
     expect(response.payload).not.toContain('maxlength')
     expect(response.payload).toContain(
-      'aria-describedby="search-holdings-hint"'
+      'for="search-holdings">Enter a CPH number, holding name, postcode or herd mark</label>'
     )
-    expect(response.payload).toContain('id="search-holdings-hint"')
     expect(response.payload).toContain('town or county')
+    // The search box sits above the examples, per the v3 design.
+    expect(
+      response.payload.indexOf('<form method="GET" class="lis-search-form"')
+    ).toBeLessThan(response.payload.indexOf('You can search using:'))
   })
 
   test('Should accept a search longer than 100 characters', async () => {

@@ -8,19 +8,7 @@
       <h1 class="govuk-heading-l">Find a holding</h1>
 
       <div class="govuk-form-group">
-        <label class="govuk-label" for="search-holdings">Search by CPH number, holding name, herd mark, town or county, or postcode</label>
-        {% if not searched %}
-        <div id="search-holdings-hint" class="govuk-hint">
-          <p class="govuk-!-margin-bottom-1">You can search using:</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li>CPH number, for example 12/345/0001</li>
-            <li>holding name, for example Oakfield Farm</li>
-            <li>herd mark, for example UK 123456</li>
-            <li>town or county, for example Cumbria</li>
-            <li>postcode, for example SY4 1AB</li>
-          </ul>
-        </div>
-        {% endif %}
+        <label class="govuk-label" for="search-holdings">Enter a CPH number, holding name, postcode or herd mark</label>
 
         <form method="GET" class="lis-search-form">
           <div class="lis-search-form__wrapper">
@@ -29,7 +17,6 @@
               type="search"
               id="search-holdings"
               name="search"
-              {% if not searched %}aria-describedby="search-holdings-hint"{% endif %}
               value="{{ search }}"
             >
             <div class="lis-search-form__submit-wrapper">
@@ -45,7 +32,16 @@
         </form>
       </div>
 
-      {% if searched %}
+      {% if not searched %}
+        <p class="govuk-body">You can search using:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>CPH number, for example 12/345/0001</li>
+          <li>holding name, for example Oakfield Farm</li>
+          <li>herd mark, for example UK 123456</li>
+          <li>town or county, for example Cumbria</li>
+          <li>postcode, for example SY4 1AB</li>
+        </ul>
+      {% else %}
         <h2 class="govuk-body govuk-!-text-break-word"><strong>{{ total }}</strong> {% if total == 1 %}holding matches{% else %}holdings match{% endif %} ‘{{ search }}’</h2>
         <p class="govuk-body"><a class="govuk-link" href="/holdings">Clear search</a></p>
       {% endif %}
