@@ -237,7 +237,7 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(authorizeBackOfficeAccess(user, { path: '/cphs' })).toBe(false)
     expect(warn).toHaveBeenCalledWith(
-      { userId: 'test-user', path: '/cphs' },
+      { path: '/cphs' },
       'Back-office access denied'
     )
   })
