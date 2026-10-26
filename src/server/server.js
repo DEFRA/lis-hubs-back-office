@@ -10,6 +10,8 @@ import {
   requestContext
 } from '@defra/lis-hubs-infra-core'
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
+import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
+import { COOKIES_POLICY_COOKIE_NAME } from '@defra/lis-infra-ui-services/cookies/cookies-policy'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
 import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
@@ -42,7 +44,8 @@ const sessionCache = createSessionCachePluginForConfig(config)
 const proxy = createProxyPlugin({
   hubId: 'back-office',
   environment: config.get('environment'),
-  hubJwtCookieName: config.get('auth.hubJwt.cookieName')
+  hubJwtCookieName: config.get('auth.hubJwt.cookieName'),
+  forwardedCookieNames: [COOKIES_POLICY_COOKIE_NAME]
 })
 const { getRequestBasePath } = createBasePathHelpersForConfig({
   assetPath: config.get('assetPath')
@@ -52,6 +55,26 @@ const nunjucksConfig = createNunjucksConfig({
   logger,
   getRequestBasePath
 })
+
+// Listed on the cookies page; every cookie the hub sets is essential. The
+// durations describe session.cookie.ttl and auth.hubJwt.ttlSeconds defaults.
+const essentialCookies = [
+  {
+    name: config.get('session.cache.name'),
+    purpose: 'Keeps you signed in as you move between pages',
+    expires: 'After 4 hours, or when you sign out'
+  },
+  {
+    name: config.get('auth.hubJwt.cookieName'),
+    purpose: 'Tells the parts of the service who you are signed in as',
+    expires: 'After 4 hours, or when you sign out'
+  },
+  {
+    name: 'cookies_policy',
+    purpose: 'Saves your cookie consent settings',
+    expires: 'After 1 year'
+  }
+]
 
 /**
  * @returns {Promise<Server>}
@@ -108,6 +131,7 @@ export async function createServer() {
     serveStaticFiles,
     auth.plugin,
     health.plugin,
+    createCookiesPlugin({ essentialCookies }),
     home.plugin,
     holdings.plugin,
     proxy.plugin
