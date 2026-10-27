@@ -61,10 +61,7 @@ export function authorizeBackOfficeAccess(user, request) {
     return true
   }
 
-  logger.warn(
-    { userId: user.sub, path: request.path },
-    'Back-office access denied'
-  )
+  logger.warn({ path: request.path }, 'Back-office access denied')
 
   return false
 }
