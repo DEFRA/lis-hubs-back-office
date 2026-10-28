@@ -33,15 +33,17 @@ class CattleHomeBe4FeClient extends BaseClient {
    * @param {object} options
    * @param {string} options.environment 'local' | 'docker_compose' | 'dev' | 'test' | 'ext-test' | 'perf-test' | 'prod'
    * @param {string} [options.apiKey] API key sent to the cattle-home BE4FE as x-api-key
-   * @param {number} [options.timeout] request timeout in milliseconds
+   * @param {number} [options.timeout] total milliseconds allowed for the response headers and body
+   * @param {{ failureThreshold?: number, resetTimeout?: number }} [options.circuitBreaker] circuit breaker settings; see BaseClient for the defaults
    */
-  constructor({ environment, apiKey, timeout }) {
+  constructor({ environment, apiKey, timeout, circuitBreaker }) {
     super({
       environment,
       serviceName: 'lis-be4fe-cattle-home',
       port: localPort,
       apiKey,
-      timeout
+      timeout,
+      circuitBreaker
     })
   }
 
@@ -66,5 +68,6 @@ class CattleHomeBe4FeClient extends BaseClient {
 export const cattleHomeBe4FeClient = new CattleHomeBe4FeClient({
   environment: config.get('environment'),
   apiKey: config.get('cattleHomeApi.apiKey'),
-  timeout: config.get('cattleHomeApi.timeout')
+  timeout: config.get('cattleHomeApi.timeout'),
+  circuitBreaker: config.get('cattleHomeApi.circuitBreaker')
 })

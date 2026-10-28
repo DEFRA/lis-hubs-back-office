@@ -91,7 +91,7 @@ jobs:
         env:
           IMAGE: ${{ steps.image.outputs.ref }}
         run: |
-          container=$(docker run --detach --env HUB_JWT_SECRET=ci-smoke-test-hub-jwt-secret --env SESSION_COOKIE_PASSWORD=ci-smoke-test-session-cookie-password-0123456789 --env PORT=3102 --publish 3102:3102 "$IMAGE")
+          container=$(docker run --detach --env HUB_JWT_SECRET=ci-smoke-test-hub-jwt-secret-0123456789 --env SESSION_COOKIE_PASSWORD=ci-smoke-test-session-cookie-password-0123456789 --env PORT=3102 --publish 3102:3102 "$IMAGE")
 
           cleanup() {
             docker logs "$container" || true

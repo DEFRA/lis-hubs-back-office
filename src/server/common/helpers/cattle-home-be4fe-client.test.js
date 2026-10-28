@@ -74,3 +74,23 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
     expect(error).toBe(badRequest)
   })
 })
+
+describe('CattleHomeBe4FeClient circuit breaker', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('uses the configured failure threshold', async () => {
+    // Arrange
+    vi.stubEnv('CATTLE_HOME_API_CIRCUIT_BREAKER_FAILURE_THRESHOLD', '1')
+    vi.resetModules()
+    const { cattleHomeBe4FeClient: reloadedClient } =
+      await import('./cattle-home-be4fe-client.js')
+
+    // Act
+    reloadedClient._circuitBreaker.recordFailure()
+
+    // Assert
+    expect(reloadedClient._circuitBreaker.state).toBe('open')
+  })
+})

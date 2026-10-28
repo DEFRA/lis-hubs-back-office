@@ -4,6 +4,10 @@ import { fileURLToPath } from 'node:url'
 
 import convictFormatWithValidator from 'convict-format-with-validator'
 
+import {
+  positiveInteger,
+  secret
+} from '@defra/lis-infra-ui-services/config-formats'
 import { milliseconds } from '@defra/lis-infra-ui-services/duration'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -13,6 +17,8 @@ const isTest = process.env.NODE_ENV === 'test'
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 convict.addFormats(convictFormatWithValidator)
+convict.addFormat(positiveInteger)
+convict.addFormat(secret)
 
 export const config = convict({
   serviceVersion: {
@@ -58,7 +64,7 @@ export const config = convict({
   },
   staticCacheTimeout: {
     doc: 'Cache timeout for static assets in milliseconds',
-    format: Number,
+    format: positiveInteger.name,
     default: milliseconds.oneDay,
     env: 'STATIC_CACHE_TIMEOUT'
   },
@@ -128,7 +134,7 @@ export const config = convict({
       },
       ttl: {
         doc: 'Server-side session cache ttl',
-        format: Number,
+        format: positiveInteger.name,
         default: milliseconds.fourHours,
         env: 'SESSION_CACHE_TTL'
       }
@@ -136,13 +142,13 @@ export const config = convict({
     cookie: {
       ttl: {
         doc: 'Session cookie ttl',
-        format: Number,
+        format: positiveInteger.name,
         default: milliseconds.fourHours,
         env: 'SESSION_COOKIE_TTL'
       },
       password: {
         doc: 'Session cookie password',
-        format: String,
+        format: secret.name,
         default: null,
         env: 'SESSION_COOKIE_PASSWORD',
         sensitive: true
@@ -214,6 +220,28 @@ export const config = convict({
       env: 'MAINTENANCE_AVAILABLE_FROM'
     }
   },
+  proxy: {
+    timeout: {
+      doc: 'Milliseconds to wait for a spoke to send its response headers before answering 504',
+      format: positiveInteger.name,
+      default: 30000,
+      env: 'PROXY_TIMEOUT'
+    },
+    circuitBreaker: {
+      failureThreshold: {
+        doc: 'Consecutive spoke transport failures (connection refused, timeout) that open its circuit breaker',
+        format: positiveInteger.name,
+        default: 5,
+        env: 'PROXY_CIRCUIT_BREAKER_FAILURE_THRESHOLD'
+      },
+      resetTimeout: {
+        doc: 'Milliseconds the spoke circuit breaker stays open before letting a probe request through',
+        format: positiveInteger.name,
+        default: 30000,
+        env: 'PROXY_CIRCUIT_BREAKER_RESET_TIMEOUT'
+      }
+    }
+  },
   cattleHomeApi: {
     apiKey: {
       doc: 'API key sent to the cattle-home BE4FE as x-api-key',
@@ -223,10 +251,24 @@ export const config = convict({
       sensitive: true
     },
     timeout: {
-      doc: 'Timeout in milliseconds for cattle-home BE4FE API requests',
-      format: 'nat',
+      doc: 'Total milliseconds allowed for a cattle-home BE4FE API response, headers and body',
+      format: positiveInteger.name,
       default: 5000,
       env: 'CATTLE_HOME_API_TIMEOUT'
+    },
+    circuitBreaker: {
+      failureThreshold: {
+        doc: 'Consecutive cattle-home BE4FE transport failures (connection refused, timeout) that open its circuit breaker',
+        format: positiveInteger.name,
+        default: 5,
+        env: 'CATTLE_HOME_API_CIRCUIT_BREAKER_FAILURE_THRESHOLD'
+      },
+      resetTimeout: {
+        doc: 'Milliseconds the cattle-home BE4FE circuit breaker stays open before letting a probe request through',
+        format: positiveInteger.name,
+        default: 30000,
+        env: 'CATTLE_HOME_API_CIRCUIT_BREAKER_RESET_TIMEOUT'
+      }
     }
   },
   auth: {
@@ -251,7 +293,7 @@ export const config = convict({
       },
       secret: {
         doc: 'Shared secret used to sign and verify hub-issued JWTs',
-        format: String,
+        format: secret.name,
         default: null,
         env: 'HUB_JWT_SECRET',
         sensitive: true
@@ -270,7 +312,7 @@ export const config = convict({
       },
       ttlSeconds: {
         doc: 'TTL in seconds for hub-issued JWTs',
-        format: Number,
+        format: positiveInteger.name,
         default: 14400,
         env: 'HUB_JWT_TTL_SECONDS'
       }
