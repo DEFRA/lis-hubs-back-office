@@ -45,7 +45,9 @@ const proxy = createProxyPlugin({
   hubId: 'back-office',
   environment: config.get('environment'),
   hubJwtCookieName: config.get('auth.hubJwt.cookieName'),
-  forwardedCookieNames: [COOKIES_POLICY_COOKIE_NAME]
+  forwardedCookieNames: [COOKIES_POLICY_COOKIE_NAME],
+  proxyTimeout: config.get('proxy.timeout'),
+  circuitBreaker: config.get('proxy.circuitBreaker')
 })
 const { getRequestBasePath } = createBasePathHelpersForConfig({
   assetPath: config.get('assetPath')

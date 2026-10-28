@@ -415,7 +415,7 @@ describe('#backOfficeServer', () => {
   })
 
   test.each([
-    ['a 503', 503, 503, 'Sorry, the service is unavailable'],
+    ['a 503', 503, 503, 'Sorry, there is a problem with the service'],
     ['no', undefined, 500, 'Sorry, there is a problem with the service']
   ])(
     'Should render the error page when the BE4FE fails with %s status code',

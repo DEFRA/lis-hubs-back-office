@@ -214,6 +214,28 @@ export const config = convict({
       env: 'MAINTENANCE_AVAILABLE_FROM'
     }
   },
+  proxy: {
+    timeout: {
+      doc: 'Milliseconds to wait for a spoke to send its response headers before answering 504',
+      format: 'nat',
+      default: 30000,
+      env: 'PROXY_TIMEOUT'
+    },
+    circuitBreaker: {
+      failureThreshold: {
+        doc: 'Consecutive spoke transport failures (connection refused, timeout) that open its circuit breaker',
+        format: 'nat',
+        default: 5,
+        env: 'PROXY_CIRCUIT_BREAKER_FAILURE_THRESHOLD'
+      },
+      resetTimeout: {
+        doc: 'Milliseconds the spoke circuit breaker stays open before letting a probe request through',
+        format: 'nat',
+        default: 30000,
+        env: 'PROXY_CIRCUIT_BREAKER_RESET_TIMEOUT'
+      }
+    }
+  },
   cattleHomeApi: {
     apiKey: {
       doc: 'API key sent to the cattle-home BE4FE as x-api-key',
@@ -223,10 +245,24 @@ export const config = convict({
       sensitive: true
     },
     timeout: {
-      doc: 'Timeout in milliseconds for cattle-home BE4FE API requests',
+      doc: 'Total milliseconds allowed for a cattle-home BE4FE API response, headers and body',
       format: 'nat',
       default: 5000,
       env: 'CATTLE_HOME_API_TIMEOUT'
+    },
+    circuitBreaker: {
+      failureThreshold: {
+        doc: 'Consecutive cattle-home BE4FE transport failures (connection refused, timeout) that open its circuit breaker',
+        format: 'nat',
+        default: 5,
+        env: 'CATTLE_HOME_API_CIRCUIT_BREAKER_FAILURE_THRESHOLD'
+      },
+      resetTimeout: {
+        doc: 'Milliseconds the cattle-home BE4FE circuit breaker stays open before letting a probe request through',
+        format: 'nat',
+        default: 30000,
+        env: 'CATTLE_HOME_API_CIRCUIT_BREAKER_RESET_TIMEOUT'
+      }
     }
   },
   auth: {
