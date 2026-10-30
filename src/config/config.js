@@ -342,7 +342,13 @@ export const config = convict({
         },
         clientSecret: {
           doc: 'OIDC client secret for the primary SSO provider',
-          format: String,
+          // Any non-empty string: identity providers issue secrets of their own
+          // length, so the shared 32-character `secret` format does not fit.
+          format: (value) => {
+            if (typeof value !== 'string' || value.length === 0) {
+              throw new Error('must be set')
+            }
+          },
           default: null,
           env: 'OIDC_CLIENT_SECRET',
           sensitive: true

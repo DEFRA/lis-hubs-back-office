@@ -41,20 +41,23 @@ describe('oidc client secret', () => {
     vi.resetModules()
   })
 
-  test('fails to load when OIDC_CLIENT_SECRET is not set', async () => {
+  test.each([
+    ['not set', undefined],
+    ['empty', '']
+  ])('fails to load when OIDC_CLIENT_SECRET is %s', async (_, value) => {
     // Arrange
-    vi.stubEnv('OIDC_CLIENT_SECRET', undefined)
+    vi.stubEnv('OIDC_CLIENT_SECRET', value)
 
     // Act
     let error
     try {
-      await import('./config.js?oidc=missing')
+      await import('./config.js')
     } catch (e) {
       error = e
     }
 
     // Assert
-    expect(error.message).toContain('clientSecret')
+    expect(error.message).toContain('clientSecret: must be set')
   })
 })
 
