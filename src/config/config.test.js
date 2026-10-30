@@ -34,3 +34,63 @@ describe('session cache ttl', () => {
     )
   })
 })
+
+describe('oidc client secret', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  test.each([
+    ['not set', undefined],
+    ['empty', '']
+  ])('fails to load when OIDC_CLIENT_SECRET is %s', async (_, value) => {
+    // Arrange
+    vi.stubEnv('OIDC_CLIENT_SECRET', value)
+
+    // Act
+    let error
+    try {
+      await import('./config.js')
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error.message).toContain('clientSecret: must be set')
+  })
+})
+
+describe('environment', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  test('accepts ext-test', async () => {
+    // Arrange
+    vi.stubEnv('ENVIRONMENT', 'ext-test')
+
+    // Act
+    const { config } = await import('./config.js?env=ext-test')
+
+    // Assert
+    expect(config.get('environment')).toBe('ext-test')
+  })
+
+  test('rejects an environment the platform does not have', async () => {
+    // Arrange
+    vi.stubEnv('ENVIRONMENT', 'staging')
+
+    // Act
+    let error
+    try {
+      await import('./config.js?env=staging')
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error.message).toContain('environment: must be one of')
+  })
+})
