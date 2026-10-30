@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import convictFormatWithValidator from 'convict-format-with-validator'
 
 import {
+  duration,
   positiveInteger,
   secret
 } from '@defra/lis-infra-ui-services/config-formats'
@@ -16,7 +17,12 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 const isDevelopment = process.env.NODE_ENV === 'development'
 
+// Fails fast on a misconfigured ttl; ui-services' cache engine also clamps
+// every write to the same limit, so both layers are needed.
+const sessionTtl = duration({ max: 'P7D' })
+
 convict.addFormats(convictFormatWithValidator)
+convict.addFormat(sessionTtl)
 convict.addFormat(positiveInteger)
 convict.addFormat(secret)
 
@@ -134,7 +140,7 @@ export const config = convict({
       },
       ttl: {
         doc: 'Server-side session cache ttl',
-        format: positiveInteger.name,
+        format: sessionTtl.name,
         default: milliseconds.fourHours,
         env: 'SESSION_CACHE_TTL'
       }
@@ -142,7 +148,7 @@ export const config = convict({
     cookie: {
       ttl: {
         doc: 'Session cookie ttl',
-        format: positiveInteger.name,
+        format: sessionTtl.name,
         default: milliseconds.fourHours,
         env: 'SESSION_COOKIE_TTL'
       },
