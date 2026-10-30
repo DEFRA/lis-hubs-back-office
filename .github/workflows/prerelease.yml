@@ -32,6 +32,7 @@ jobs:
       smoke-port: '3102'
       smoke-env: |
         HUB_JWT_SECRET=ci-smoke-test-hub-jwt-secret-0123456789
+        OIDC_CLIENT_SECRET=ci-smoke-test-oidc-client-secret
         SESSION_COOKIE_PASSWORD=ci-smoke-test-session-cookie-password-0123456789
 
   sonar-analysis:
