@@ -265,7 +265,7 @@ describe('#backOfficeServer', () => {
       pageSize: 25
     })
     expect(response.payload).toContain('<strong>11</strong> holdings match')
-    expect(response.payload).toContain('href="/cattle/holdings/22/002/0002"')
+    expect(response.payload).toContain('href="/holdings/22/002/0002/cattle"')
     expect(response.payload).not.toContain('Page 1 of')
   })
 
@@ -356,7 +356,7 @@ describe('#backOfficeServer', () => {
 
     expect(response.payload).toContain('Holdings search results')
     expect(response.payload).toMatch(
-      /<th scope="row"[^>]*>\s*<a class="govuk-link" href="\/cattle\/holdings\/22\/001\/0001">/
+      /<th scope="row"[^>]*>\s*<a class="govuk-link" href="\/holdings\/22\/001\/0001\/cattle">/
     )
     expect(response.payload).not.toContain('You can search using:')
     expect(response.payload).not.toContain(
@@ -458,7 +458,7 @@ describe('#backOfficeServer', () => {
       results: [
         {
           cph: '22/001/0001',
-          href: '/cattle/holdings/22/001/0001',
+          href: '/holdings/22/001/0001/cattle',
           location: 'Oakfield Farm',
           status: 'Active'
         }

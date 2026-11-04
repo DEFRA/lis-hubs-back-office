@@ -15,13 +15,15 @@ environments, deployments, logs and metrics.
 ## Architecture
 
 LIS uses a hub and spoke design. A hub owns sign-in and sessions; each spoke is a separate app for
-one species and task, mounted under a path on the hub:
+one species and task, proxied by the hub at its registry mounts, with the path forwarded unchanged:
 
 ```text
-browser → back-office hub ─┬─ /cattle           → lis-apps-cattle-home
-                           ├─ /cattle/register  → lis-apps-cattle-register
-                           ├─ /cattle/move      → lis-apps-cattle-move
-                           └─ /cattle/death     → lis-apps-cattle-death
+browser → back-office hub ─┬─ /holdings/<cph>/cattle           → lis-apps-cattle-home
+                           ├─ /animals/cattle                  → lis-apps-cattle-home
+                           ├─ /holdings/<cph>/cattle/register  → lis-apps-cattle-register
+                           ├─ /holdings/<cph>/cattle/move      → lis-apps-cattle-move
+                           ├─ /holdings/<cph>/cattle/death     → lis-apps-cattle-death
+                           └─ /assets/<module id>              → the matching spoke
 ```
 
 - **Authentication:** staff sign in with Microsoft Entra ID (OIDC). The hub keeps a server-side
@@ -65,18 +67,18 @@ The hub's `HUB_JWT_ISSUER` must be in each spoke's `HUB_ORIGINS`. `HUB_JWT_AUDIE
 
 ### Routes
 
-| Path                   | Purpose                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `/`                    | Redirects to `/holdings`                                                    |
-| `/holdings`            | Find a holding: search by term, 25 results a page, linking to `/cattle/...` |
-| `/auth/login`          | Starts sign-in                                                              |
-| `/sso`                 | OIDC callback                                                               |
-| `/auth/logout`         | Signs the user out                                                          |
-| `/signout`             | Redirects to `/auth/logout` (the header link)                               |
-| `/auth/not-authorised` | Tells a refused user they are not authorised, with a sign out link          |
-| `/cookies`             | Cookies page and consent form                                               |
-| `/health`              | Health check                                                                |
-| `/cattle/...`          | Proxied to the cattle spokes (see above)                                    |
+| Path                                                                        | Purpose                                                                                |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `/`                                                                         | Redirects to `/holdings`                                                               |
+| `/holdings`                                                                 | Find a holding: search by term, 25 results a page, linking to `/holdings/<cph>/cattle` |
+| `/auth/login`                                                               | Starts sign-in                                                                         |
+| `/sso`                                                                      | OIDC callback                                                                          |
+| `/auth/logout`                                                              | Signs the user out                                                                     |
+| `/signout`                                                                  | Redirects to `/auth/logout` (the header link)                                          |
+| `/auth/not-authorised`                                                      | Tells a refused user they are not authorised, with a sign out link                     |
+| `/cookies`                                                                  | Cookies page and consent form                                                          |
+| `/health`                                                                   | Health check                                                                           |
+| `/holdings/<cph>/cattle/...`, `/animals/cattle/...`, `/assets/<module>/...` | Proxied to the cattle spokes at their registry mounts (see above)                      |
 
 Static assets are served under `ASSET_PATH` (default `/public`).
 
