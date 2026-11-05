@@ -76,8 +76,9 @@ and `HUB_JWT_SECRET` must match the spoke's values.
 | `/holdings`                                                                 | Find a holding: search by term, 25 results a page, linking to `/holdings/<cph>/cattle` |
 | `/auth/login`                                                               | Starts sign-in                                                                         |
 | `/sso`                                                                      | OIDC callback                                                                          |
-| `/auth/logout`                                                              | Signs the user out                                                                     |
-| `/signout`                                                                  | Redirects to `/auth/logout` (the header link)                                          |
+| `GET /auth/logout`                                                          | Redirects to `/signout` (old sign-out path)                                            |
+| `POST /signout`                                                             | Signs the user out from the confirmation page (needs the CSRF token)                   |
+| `GET /signout`                                                              | The header Sign out link: asks a signed-in user to confirm, sends anyone else to `/`   |
 | `/auth/not-authorised`                                                      | Tells a refused user they are not authorised, with a sign out link                     |
 | `/cookies`                                                                  | Cookies page and consent form                                                          |
 | `/health`                                                                   | Health check                                                                           |
