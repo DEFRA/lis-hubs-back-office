@@ -12,6 +12,7 @@ import {
 } from '@defra/lis-hubs-infra-core'
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
 import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
+import { csrfPlugin } from '@defra/lis-infra-ui-services/csrf'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
 import { createSessionCachePluginForConfig } from '@defra/lis-infra-ui-services/session-cache'
@@ -122,6 +123,9 @@ export async function createServer() {
     }),
     serveStaticFiles,
     auth.plugin,
+    // After the session and auth, as it keeps its token in the session once
+    // the request is authenticated.
+    { plugin: csrfPlugin, options: { tokenSource: 'session' } },
     health.plugin,
     createCookiesPlugin({ essentialCookies }),
     home.plugin,

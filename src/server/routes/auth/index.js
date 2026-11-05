@@ -11,7 +11,8 @@ import { config } from '#config/config.js'
 import {
   buildAuthorizationUrl,
   buildLogoutUrl,
-  completeAuthorizationCodeGrant
+  completeAuthorizationCodeGrant,
+  getLogoutOrigins
 } from '#server/common/helpers/auth/oidc.js'
 
 function resolveAuthSession({ user }) {
@@ -60,6 +61,7 @@ export const auth = createHubAuth({
   buildAuthorizationUrl,
   completeAuthorizationCodeGrant,
   buildLogoutUrl,
+  getLogoutOrigins,
   loginRoutes: [{ path: '/auth/login' }],
   authorize: authorizeBackOfficeAccess
 })

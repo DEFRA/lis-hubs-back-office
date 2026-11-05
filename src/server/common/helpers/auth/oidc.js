@@ -7,7 +7,8 @@ import { mapUser } from './map-user.js'
 export const {
   buildAuthorizationUrl,
   buildLogoutUrl,
-  completeAuthorizationCodeGrant
+  completeAuthorizationCodeGrant,
+  getLogoutOrigins
 } = createOidcClient({
   getProviderConfig,
   getHubOrigin: config.get.bind(config, 'auth.hubOrigin'),
