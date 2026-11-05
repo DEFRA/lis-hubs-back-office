@@ -148,10 +148,9 @@ describe('#backOfficeServer', () => {
     // Assert
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/auth/not-authorised')
-    expect(response.headers['set-cookie']).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
+    expect([response.headers['set-cookie']].flat().join(' ')).not.toContain(
+      'livestock_hub_jwt'
     )
-    expect(response.headers['set-cookie'].join(' ')).toContain('Max-Age=0')
   })
 
   test('Should render the not authorised page with a sign out button for a signed-in user', async () => {
