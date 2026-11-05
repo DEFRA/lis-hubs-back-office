@@ -4,6 +4,7 @@ import path from 'node:path'
 import hapi from '@hapi/hapi'
 import inert from '@hapi/inert'
 import Scooter from '@hapi/scooter'
+import { getHubJwt } from '@defra/lis-hubs-infra-access/authentication'
 import {
   createProxyPlugin,
   logger,
@@ -11,7 +12,6 @@ import {
 } from '@defra/lis-hubs-infra-core'
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
 import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
-import { COOKIES_POLICY_COOKIE_NAME } from '@defra/lis-infra-ui-services/cookies/cookies-policy'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
 import { createSessionCachePluginForConfig } from '@defra/lis-infra-ui-services/session-cache'
@@ -39,12 +39,12 @@ logger.serviceName = serviceName
 logger.serviceVersion = config.get('serviceVersion')
 logger.context.hashSecret = config.get('log.hashSecret')
 const requestLogger = logger.hapiPlugin
+const sessionCookieName = config.get('session.cache.name')
 const sessionCache = createSessionCachePluginForConfig(config)
 const proxy = createProxyPlugin({
   hubId: 'back-office',
   environment: config.get('environment'),
-  hubJwtCookieName: config.get('auth.hubJwt.cookieName'),
-  forwardedCookieNames: [COOKIES_POLICY_COOKIE_NAME],
+  getUserToken: getHubJwt,
   proxyTimeout: config.get('proxy.timeout'),
   circuitBreaker: config.get('proxy.circuitBreaker')
 })
@@ -54,16 +54,11 @@ const nunjucksConfig = createNunjucksConfig({
 })
 
 // Listed on the cookies page; every cookie the hub sets is essential. The
-// durations describe session.cookie.ttl and auth.hubJwt.ttlSeconds defaults.
+// session expiry describes the session.cookie.ttl default.
 const essentialCookies = [
   {
-    name: config.get('session.cache.name'),
+    name: sessionCookieName,
     purpose: 'Keeps you signed in as you move between pages',
-    expires: 'After 4 hours, or when you sign out'
-  },
-  {
-    name: config.get('auth.hubJwt.cookieName'),
-    purpose: 'Tells the parts of the service who you are signed in as',
     expires: 'After 4 hours, or when you sign out'
   },
   {
@@ -97,7 +92,7 @@ export async function createServer() {
     },
     cache: [
       {
-        name: config.get('session.cache.name'),
+        name: sessionCookieName,
         engine: getCacheEngine({
           engine: config.get('session.cache.engine'),
           config,

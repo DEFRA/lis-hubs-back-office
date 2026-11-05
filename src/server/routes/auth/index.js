@@ -1,7 +1,4 @@
-import {
-  createHubAuth,
-  createHubCookieOptions
-} from '@defra/lis-hubs-infra-access/authentication'
+import { createHubAuth } from '@defra/lis-hubs-infra-access/authentication'
 import {
   GLOBAL_CPH_SCOPE,
   PERMISSIONS,
@@ -25,16 +22,6 @@ function resolveAuthSession({ user }) {
       role,
       cph: GLOBAL_CPH_SCOPE
     }))
-  })
-}
-
-function getHubJwtCookieName() {
-  return config.get('auth.hubJwt.cookieName')
-}
-
-function getCookieOptions() {
-  return createHubCookieOptions({
-    ttlSeconds: config.get('auth.hubJwt.ttlSeconds')
   })
 }
 
@@ -68,8 +55,6 @@ export function authorizeBackOfficeAccess(user, request) {
 
 export const auth = createHubAuth({
   hubId: 'back-office',
-  getHubJwtCookieName,
-  getCookieOptions,
   getHubJwtConfig,
   resolveAuthSession,
   buildAuthorizationUrl,

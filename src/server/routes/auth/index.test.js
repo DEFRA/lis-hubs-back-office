@@ -56,26 +56,11 @@ const jwtConfig = {
 function createConfigValueMap() {
   return {
     'auth.primaryProvider': 'entra',
-    'auth.hubJwt.cookieName': 'livestock_hub_jwt',
     'auth.hubJwt.secret': jwtConfig.secret,
     'auth.hubJwt.issuer': jwtConfig.issuer,
     'auth.hubJwt.audience': jwtConfig.audience,
     'auth.hubJwt.ttlSeconds': 14400
   }
-}
-
-function extractCookieValue(setCookieHeader, cookieName) {
-  const cookieHeader = (
-    Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader]
-  ).find((value) => value.startsWith(`${cookieName}=`))
-
-  if (!cookieHeader) {
-    throw new Error(`Cookie ${cookieName} was not found in response`)
-  }
-
-  return decodeURIComponent(
-    cookieHeader.split(';')[0].slice(cookieName.length + 1)
-  )
 }
 
 async function createTestServer() {
@@ -88,6 +73,20 @@ async function createTestServer() {
   await server.register(auth.plugin)
 
   return server
+}
+
+function stubSession(server) {
+  const yar = { get: vi.fn(), set: vi.fn(), clear: vi.fn() }
+  server.ext('onRequest', (request, h) => {
+    request.yar = yar
+    return h.continue
+  })
+
+  return yar
+}
+
+function sessionJwt(yar) {
+  return yar.set.mock.calls.find(([key]) => key === 'hub-jwt')?.[1]
 }
 
 describe('#backOfficeAuthRoutes', () => {
@@ -160,6 +159,7 @@ describe('#backOfficeAuthRoutes', () => {
       returnUrl: '/dashboard'
     })
     const server = await createTestServer()
+    const yar = stubSession(server)
     const response = await server.inject({
       method: 'GET',
       url: '/sso'
@@ -169,11 +169,10 @@ describe('#backOfficeAuthRoutes', () => {
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/dashboard')
-    const token = extractCookieValue(
-      response.headers['set-cookie'],
+    expect([response.headers['set-cookie']].flat().join(' ')).not.toContain(
       'livestock_hub_jwt'
     )
-    const payload = await verifyHubJwt(token, jwtConfig)
+    const payload = await verifyHubJwt(sessionJwt(yar), jwtConfig)
 
     expect(payload.sub).toBe(user.sub)
     expect(payload.statements).toEqual([
@@ -226,9 +225,11 @@ describe('#backOfficeAuthRoutes', () => {
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/auth/not-authorised')
     expect(buildLogoutUrl).not.toHaveBeenCalled()
-    expect(clearSession).not.toHaveBeenCalled()
-    expect(response.headers['set-cookie']).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^livestock_hub_jwt=;/)])
+    // Refusal drops the hub JWT from the session but keeps the session itself
+    expect(clearSession).toHaveBeenCalledWith('hub-jwt')
+    expect(clearSession).not.toHaveBeenCalledWith('hub-auth-session')
+    expect([response.headers['set-cookie']].flat().join(' ')).not.toContain(
+      'livestock_hub_jwt'
     )
   })
 
