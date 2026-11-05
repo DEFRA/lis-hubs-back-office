@@ -46,12 +46,11 @@ const authorisedAuth = {
 
 // A signed-in page issues the session's CSRF token; the session cookie
 // carries the session on, and the sign-out confirmation page renders the token.
-async function signIn(server) {
-  const response = await server.inject({
-    method: 'GET',
-    url: '/auth/not-authorised',
-    auth: signedInAuth
-  })
+async function signIn(
+  server,
+  { url = '/auth/not-authorised', auth = signedInAuth } = {}
+) {
+  const response = await server.inject({ method: 'GET', url, auth })
   const cookie = [response.headers['set-cookie']]
     .flat()
     .map((setCookie) => setCookie.split(';')[0])
@@ -152,9 +151,16 @@ describe('#backOfficeServer CSRF protection', () => {
       payload: {}
     })
 
+    const afterResponse = await server.inject({
+      method: 'GET',
+      url: '/signout',
+      headers: { cookie }
+    })
+
     // Assert
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/')
+    expect(afterResponse.statusCode).toBe(200)
     expect(mocks.buildLogoutUrl).not.toHaveBeenCalled()
   })
 
@@ -170,10 +176,115 @@ describe('#backOfficeServer CSRF protection', () => {
       payload: { _csrf: csrfToken }
     })
 
+    const afterResponse = await server.inject({
+      method: 'GET',
+      url: '/signout',
+      headers: { cookie }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/')
+    expect(afterResponse.statusCode).toBe(200)
+    expect(mocks.buildLogoutUrl).not.toHaveBeenCalled()
+  })
+
+  test('Should send a sign-out POST with the wrong token home without signing out', async () => {
+    // Arrange
+    const { cookie } = await signIn(server)
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/signout',
+      headers: { cookie, 'sec-fetch-site': 'same-origin' },
+      payload: { _csrf: 'not-the-session-token' }
+    })
+    const afterResponse = await server.inject({
+      method: 'GET',
+      url: '/signout',
+      headers: { cookie }
+    })
+
     // Assert
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/')
     expect(mocks.buildLogoutUrl).not.toHaveBeenCalled()
+    expect(afterResponse.statusCode).toBe(200)
+  })
+
+  test('Should send a same-site sign-out POST home without signing out, even with the token', async () => {
+    // Arrange
+    const { cookie, csrfToken } = await signIn(server)
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/signout',
+      headers: { cookie, 'sec-fetch-site': 'same-site' },
+      payload: { _csrf: csrfToken }
+    })
+    const afterResponse = await server.inject({
+      method: 'GET',
+      url: '/signout',
+      headers: { cookie }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/')
+    expect(mocks.buildLogoutUrl).not.toHaveBeenCalled()
+    expect(afterResponse.statusCode).toBe(200)
+  })
+
+  test('Should sign out on a POST without sec-fetch-site when the origin matches the host', async () => {
+    // Arrange
+    const { cookie, csrfToken } = await signIn(server)
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/signout',
+      headers: {
+        cookie,
+        host: 'back-office.test',
+        origin: 'https://back-office.test'
+      },
+      payload: { _csrf: csrfToken }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('https://identity.example/logout')
+    expect(mocks.buildLogoutUrl).toHaveBeenCalledTimes(1)
+  })
+
+  test('Should send a POST without sec-fetch-site from another origin home without signing out', async () => {
+    // Arrange
+    const { cookie, csrfToken } = await signIn(server)
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/signout',
+      headers: {
+        cookie,
+        host: 'back-office.test',
+        origin: 'https://evil.example'
+      },
+      payload: { _csrf: csrfToken }
+    })
+    const afterResponse = await server.inject({
+      method: 'GET',
+      url: '/signout',
+      headers: { cookie }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/')
+    expect(mocks.buildLogoutUrl).not.toHaveBeenCalled()
+    expect(afterResponse.statusCode).toBe(200)
   })
 
   test('Should send an expired session signing out home', async () => {
@@ -286,9 +397,29 @@ describe('#backOfficeServer CSRF protection', () => {
       headers: { 'sec-fetch-site': 'same-origin' },
       payload: { analytics: 'no' }
     })
+    const setCookies = [response.headers['set-cookie']].flat().filter(Boolean)
 
     // Assert
     expect(response.statusCode).toBe(302)
+    expect(
+      setCookies.some((setCookie) => setCookie.startsWith('cookies_policy='))
+    ).toBe(true)
+  })
+
+  test('Should not record a cross-site cookie choice', async () => {
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: { 'sec-fetch-site': 'cross-site' },
+      payload: { analytics: 'no' }
+    })
+    const setCookies = [response.headers['set-cookie']].flat().filter(Boolean)
+
+    // Assert
+    expect(
+      setCookies.some((setCookie) => setCookie.startsWith('cookies_policy='))
+    ).toBe(false)
   })
 
   test('Should leave the token check on proxied spoke routes to the spoke', () => {
