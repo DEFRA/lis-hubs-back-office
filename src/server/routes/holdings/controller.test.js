@@ -134,13 +134,13 @@ describe('holdingsController', () => {
         results: [
           {
             cph: '22/003/0003',
-            href: '/cattle/holdings/22/003/0003',
+            href: '/holdings/22/003/0003/cattle',
             location: 'Lavendon, Buckinghamshire, MK1 1AB',
             status: 'Active'
           },
           {
             cph: '22/001/0001',
-            href: '/cattle/holdings/22/001/0001',
+            href: '/holdings/22/001/0001/cattle',
             location: 'Oakfield Farm, Lavendon, MK1 1AB',
             status: 'Active'
           }
@@ -169,7 +169,7 @@ describe('holdingsController', () => {
         results: [
           {
             cph: '22/003/0003',
-            href: '/cattle/holdings/22/003/0003',
+            href: '/holdings/22/003/0003/cattle',
             location: '',
             status: 'Active'
           }
@@ -205,7 +205,7 @@ describe('holdingsController', () => {
         results: [
           {
             cph: '22/008/0008',
-            href: '/cattle/holdings/22/008/0008',
+            href: '/holdings/22/008/0008/cattle',
             location: 'Lavendon, Buckinghamshire, MK1 1AB',
             status: 'Inactive'
           }

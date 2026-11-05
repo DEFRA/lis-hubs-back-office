@@ -1,3 +1,4 @@
+import { getMountPath } from '@defra/lis-hubs-infra-registry'
 import Joi from 'joi'
 
 import { PAGE_SIZE, searchHoldings } from '#server/services/holdings.js'
@@ -94,7 +95,7 @@ async function findPage({ search, page }) {
 function toRow({ cph, address, active }) {
   return {
     cph,
-    href: `/cattle/holdings/${cph}`,
+    href: getMountPath('cattle-home', 'holding', { cph }),
     location: (address ?? []).filter(Boolean).join(', '),
     status: active === false ? 'Inactive' : 'Active'
   }

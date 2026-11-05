@@ -14,7 +14,6 @@ import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
 import { COOKIES_POLICY_COOKIE_NAME } from '@defra/lis-infra-ui-services/cookies/cookies-policy'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
-import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
 import { createSessionCachePluginForConfig } from '@defra/lis-infra-ui-services/session-cache'
 import { getCacheEngine } from '@defra/lis-infra-ui-services/session-cache/cache-engine'
 import { securityHeaders } from '@defra/lis-infra-ui-services/security-headers'
@@ -49,13 +48,9 @@ const proxy = createProxyPlugin({
   proxyTimeout: config.get('proxy.timeout'),
   circuitBreaker: config.get('proxy.circuitBreaker')
 })
-const { getRequestBasePath } = createBasePathHelpersForConfig({
-  assetPath: config.get('assetPath')
-})
 const nunjucksConfig = createNunjucksConfig({
   config,
-  logger,
-  getRequestBasePath
+  logger
 })
 
 // Listed on the cookies page; every cookie the hub sets is essential. The
