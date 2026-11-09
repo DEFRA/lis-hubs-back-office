@@ -48,7 +48,7 @@
     "joi": "18.2.5"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.29.2",
+    "@babel/preset-env": "8.0.7",
     "@defra/hapi-connect": "1.0.1",
     "@defra/lis-infra-eslint-config": "^0.6.0",
     "@vitest/coverage-istanbul": "4.1.4",
