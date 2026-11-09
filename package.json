@@ -33,10 +33,10 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@defra/lis-hubs-infra-access": "^0.45.0",
-    "@defra/lis-hubs-infra-core": "^0.33.0",
-    "@defra/lis-hubs-infra-registry": "^0.13.0",
-    "@defra/lis-infra-ui-services": "^0.51.0",
+    "@defra/lis-hubs-infra-access": "^0.45.3",
+    "@defra/lis-hubs-infra-core": "^0.33.3",
+    "@defra/lis-hubs-infra-registry": "^0.13.3",
+    "@defra/lis-infra-ui-services": "^0.51.3",
     "@hapi/boom": "10.0.1",
     "@hapi/hapi": "21.4.8",
     "@hapi/inert": "7.1.2",
@@ -48,7 +48,7 @@
     "joi": "18.2.5"
   },
   "devDependencies": {
-    "@defra/lis-infra-eslint-config": "^0.6.0",
+    "@defra/lis-infra-eslint-config": "^0.12.3",
     "@vitest/coverage-istanbul": "4.1.4",
     "@vitest/coverage-v8": "4.1.4",
     "eslint": "9.39.2",
