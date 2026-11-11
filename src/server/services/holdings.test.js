@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-import { cattleHomeBe4FeClient } from '#server/common/helpers/cattle-home-be4fe-client.js'
+import * as cattleHomeBe4FeClient from '#server/common/helpers/cattle-home-be4fe-client.js'
 
 import { PAGE_SIZE, searchHoldings } from './holdings.js'
 

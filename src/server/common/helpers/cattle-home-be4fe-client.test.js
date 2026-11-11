@@ -1,10 +1,24 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-import { cattleHomeBe4FeClient as client } from './cattle-home-be4fe-client.js'
+import { createServiceClient } from '@defra/lis-hubs-infra-core'
+
+import * as client from './cattle-home-be4fe-client.js'
+
+const service = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  patch: vi.fn(),
+  delete: vi.fn()
+}))
+
+vi.mock('@defra/lis-hubs-infra-core', () => ({
+  createServiceClient: vi.fn(() => service)
+}))
 
 describe('CattleHomeBe4FeClient.searchHoldings()', () => {
   afterEach(() => {
-    vi.restoreAllMocks()
+    vi.resetAllMocks()
   })
 
   test('requests the page of holdings and returns the payload', async () => {
@@ -19,9 +33,7 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
       has_next_page: false,
       has_previous_page: true
     }
-    const get = vi
-      .spyOn(client, '_get')
-      .mockResolvedValueOnce({ res: { statusCode: 200 }, payload })
+    service.get.mockResolvedValueOnce({ res: { statusCode: 200 }, payload })
 
     // Act
     const result = await client.searchHoldings({
@@ -31,7 +43,7 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
     })
 
     // Assert
-    expect(get).toHaveBeenCalledWith(
+    expect(service.get).toHaveBeenCalledWith(
       'api/cphs?search=Oakfield&page=2&pageSize=25'
     )
     expect(result).toEqual(payload)
@@ -39,9 +51,10 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
 
   test('encodes the search term', async () => {
     // Arrange
-    const get = vi
-      .spyOn(client, '_get')
-      .mockResolvedValueOnce({ res: { statusCode: 200 }, payload: {} })
+    service.get.mockResolvedValueOnce({
+      res: { statusCode: 200 },
+      payload: {}
+    })
 
     // Act
     await client.searchHoldings({
@@ -51,7 +64,7 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
     })
 
     // Assert
-    expect(get).toHaveBeenCalledWith(
+    expect(service.get).toHaveBeenCalledWith(
       'api/cphs?search=12%2F345+%26+0001&page=1&pageSize=25'
     )
   })
@@ -60,7 +73,7 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
     // Arrange
     const badRequest = new Error('400 - Invalid search')
     badRequest.statusCode = 400
-    vi.spyOn(client, '_get').mockRejectedValueOnce(badRequest)
+    service.get.mockRejectedValueOnce(badRequest)
 
     // Act
     let error
@@ -78,19 +91,23 @@ describe('CattleHomeBe4FeClient.searchHoldings()', () => {
 describe('CattleHomeBe4FeClient circuit breaker', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
+    vi.resetAllMocks()
   })
 
   test('uses the configured failure threshold', async () => {
     // Arrange
     vi.stubEnv('CATTLE_HOME_API_CIRCUIT_BREAKER_FAILURE_THRESHOLD', '1')
     vi.resetModules()
-    const { cattleHomeBe4FeClient: reloadedClient } =
-      await import('./cattle-home-be4fe-client.js')
+    vi.mocked(createServiceClient).mockReturnValue(service)
 
     // Act
-    reloadedClient._circuitBreaker.recordFailure()
+    await import('./cattle-home-be4fe-client.js')
 
     // Assert
-    expect(reloadedClient._circuitBreaker.state).toBe('open')
+    expect(vi.mocked(createServiceClient)).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        circuitBreaker: expect.objectContaining({ failureThreshold: 1 })
+      })
+    )
   })
 })

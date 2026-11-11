@@ -1,4 +1,4 @@
-import { cattleHomeBe4FeClient } from '#server/common/helpers/cattle-home-be4fe-client.js'
+import * as cattleHomeBe4FeClient from '#server/common/helpers/cattle-home-be4fe-client.js'
 
 /**
  * @import { HoldingSearchPage } from '#server/common/helpers/cattle-home-be4fe-client.js'
