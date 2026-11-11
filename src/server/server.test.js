@@ -11,7 +11,7 @@ import {
 } from 'vitest'
 
 import { config } from '#config/config.js'
-import { cattleHomeBe4FeClient } from '#server/common/helpers/cattle-home-be4fe-client.js'
+import * as cattleHomeBe4FeClient from '#server/common/helpers/cattle-home-be4fe-client.js'
 
 vi.mock('#server/common/helpers/cattle-home-be4fe-client.js')
 

@@ -1,4 +1,4 @@
-import { BaseClient } from '@defra/lis-hubs-infra-core'
+import { createServiceClient } from '@defra/lis-hubs-infra-core'
 
 import { config } from '#config/config.js'
 
@@ -28,46 +28,28 @@ import { config } from '#config/config.js'
 // 'docker_compose'.
 const localPort = 8087
 
-class CattleHomeBe4FeClient extends BaseClient {
-  /**
-   * @param {object} options
-   * @param {string} options.environment 'local' | 'docker_compose' | 'dev' | 'test' | 'ext-test' | 'perf-test' | 'prod'
-   * @param {string} [options.apiKey] API key sent to the cattle-home BE4FE as x-api-key
-   * @param {number} [options.timeout] total milliseconds allowed for the response headers and body
-   * @param {{ failureThreshold?: number, resetTimeout?: number }} [options.circuitBreaker] circuit breaker settings; see BaseClient for the defaults
-   */
-  constructor({ environment, apiKey, timeout, circuitBreaker }) {
-    super({
-      environment,
-      serviceName: 'lis-be4fe-cattle-home',
-      port: localPort,
-      apiKey,
-      timeout,
-      circuitBreaker
-    })
-  }
-
-  /**
-   * @param {object} options
-   * @param {string} options.search
-   * @param {number} options.page
-   * @param {number} options.pageSize
-   * @returns {Promise<HoldingSearchPage>} one page of the holdings matching the search
-   */
-  async searchHoldings({ search, page, pageSize }) {
-    const query = new URLSearchParams({
-      search,
-      page: String(page),
-      pageSize: String(pageSize)
-    })
-    const { payload } = await this._get(`api/cphs?${query}`)
-    return payload
-  }
-}
-
-export const cattleHomeBe4FeClient = new CattleHomeBe4FeClient({
+const be4fe = createServiceClient({
   environment: config.get('environment'),
+  serviceName: 'lis-be4fe-cattle-home',
+  port: localPort,
   apiKey: config.get('cattleHomeApi.apiKey'),
   timeout: config.get('cattleHomeApi.timeout'),
   circuitBreaker: config.get('cattleHomeApi.circuitBreaker')
 })
+
+/**
+ * @param {object} options
+ * @param {string} options.search
+ * @param {number} options.page
+ * @param {number} options.pageSize
+ * @returns {Promise<HoldingSearchPage>} one page of the holdings matching the search
+ */
+export async function searchHoldings({ search, page, pageSize }) {
+  const query = new URLSearchParams({
+    search,
+    page: String(page),
+    pageSize: String(pageSize)
+  })
+  const { payload } = await be4fe.get(`api/cphs?${query}`)
+  return payload
+}
