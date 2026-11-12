@@ -48,7 +48,7 @@
     "joi": "18.3.2"
   },
   "devDependencies": {
-    "@defra/lis-infra-eslint-config": "^0.12.3",
+    "@defra/lis-infra-eslint-config": "^0.12.7",
     "@vitest/coverage-istanbul": "5.1.0",
     "@vitest/coverage-v8": "5.1.0",
     "eslint": "10.14.0",
