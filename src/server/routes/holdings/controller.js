@@ -1,3 +1,5 @@
+/** @import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi' */
+
 import { getMountPath } from '@defra/lis-hubs-infra-registry'
 import Joi from 'joi'
 
@@ -18,6 +20,12 @@ export const holdingsController = {
       query: holdingsQuerySchema
     }
   },
+  /**
+   * Renders the holdings search results page.
+   * @param {Request} request - The Hapi request
+   * @param {ResponseToolkit} h - The Hapi response toolkit
+   * @returns {Promise<ResponseObject>} The holdings view response
+   */
   async handler(request, h) {
     const search = request.query.search ?? ''
     const searched = search !== ''
