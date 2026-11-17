@@ -10,7 +10,10 @@ import {
   logger,
   requestContext
 } from '@defra/lis-hubs-infra-core'
-import { catchAll } from '@defra/lis-infra-ui-services/errors'
+import {
+  catchAll,
+  createNotFoundRoute
+} from '@defra/lis-infra-ui-services/errors'
 import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
 import { csrfPlugin } from '@defra/lis-infra-ui-services/csrf'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
@@ -133,6 +136,7 @@ export async function createServer() {
     proxy.plugin
   ])
 
+  server.route(createNotFoundRoute({ auth: { mode: 'try' } }))
   server.ext('onPreResponse', catchAll)
 
   // Register the CSP and security-header plugins after the catchAll error
