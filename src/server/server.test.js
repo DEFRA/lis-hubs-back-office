@@ -200,6 +200,10 @@ describe('#backOfficeServer', () => {
     const request = {
       method: 'GET',
       url: '/no-such-page',
+      headers: {
+        cookie:
+          'cookies_policy=%7B%22essential%22%3Atrue%2C%22analytics%22%3Atrue%7D'
+      },
       auth: hubAuth([PERMISSIONS.backOffice])
     }
 
@@ -208,6 +212,7 @@ describe('#backOfficeServer', () => {
 
     // Assert
     expect(response.statusCode).toBe(404)
+    expect(response.payload).not.toContain('govuk-cookie-banner')
     expect(response.payload).toContain('Page not found')
     expect(response.payload).toContain(
       'If you typed the web address, check it is correct.'
