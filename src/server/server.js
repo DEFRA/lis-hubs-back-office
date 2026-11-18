@@ -15,6 +15,7 @@ import {
   createNotFoundRoute
 } from '@defra/lis-infra-ui-services/errors'
 import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
+import { contentSecurityPolicy } from '@defra/lis-infra-ui-services/content-security-policy'
 import { csrfPlugin } from '@defra/lis-infra-ui-services/csrf'
 import { createMaintenancePlugin } from '@defra/lis-infra-ui-services/maintenance'
 import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plugin'
@@ -24,7 +25,6 @@ import { securityHeaders } from '@defra/lis-infra-ui-services/security-headers'
 import { setupProxy } from '@defra/lis-infra-ui-services/proxy/setup-proxy'
 
 import { config } from '#config/config.js'
-import { contentSecurityPolicy } from '#server/plugins/content-security-policy.js'
 import { serveStaticFiles } from '#server/plugins/serve-static-files.js'
 import { auth } from '#server/routes/auth/index.js'
 import { health } from '#server/routes/health/index.js'
@@ -49,12 +49,14 @@ const proxy = createProxyPlugin({
   hubId: 'back-office',
   environment: config.get('environment'),
   getUserToken: getHubJwt,
+  gtmId: config.get('gtmId'),
   proxyTimeout: config.get('proxy.timeout'),
   circuitBreaker: config.get('proxy.circuitBreaker')
 })
 const nunjucksConfig = createNunjucksConfig({
   config,
-  logger
+  logger,
+  gtmId: config.get('gtmId')
 })
 
 // Listed on the cookies page; every cookie the hub sets is essential. The
