@@ -94,3 +94,65 @@ describe('environment', () => {
     expect(error.message).toContain('environment: must be one of')
   })
 })
+
+describe('gtmId', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  test('is off by default', async () => {
+    // Act
+    const { config } = await import('./config.js?gtm=default')
+
+    // Assert
+    expect(config.get('gtmId')).toBeNull()
+  })
+
+  test('accepts a container id from the environment', async () => {
+    // Arrange
+    vi.stubEnv('GTM_ID', 'GTM-ABC1234')
+
+    // Act
+    const { config } = await import('./config.js?gtm=set')
+
+    // Assert
+    expect(config.get('gtmId')).toBe('GTM-ABC1234')
+  })
+
+  test('accepts an empty value as off', async () => {
+    // Arrange
+    vi.stubEnv('GTM_ID', '')
+
+    // Act
+    let result, error
+    try {
+      const { config } = await import('./config.js?gtm=empty')
+      result = config.get('gtmId')
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error).toBeUndefined()
+    expect(result).toBe('')
+  })
+
+  test('rejects a value that is not a container id', async () => {
+    // Arrange
+    vi.stubEnv('GTM_ID', 'G-ABC1234')
+
+    // Act
+    let error
+    try {
+      await import('./config.js?gtm=invalid')
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error.message).toContain(
+      'gtmId: must be a Google Tag Manager container id'
+    )
+  })
+})

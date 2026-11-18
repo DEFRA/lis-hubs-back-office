@@ -28,6 +28,8 @@ convict.addFormat(sessionTtl)
 convict.addFormat(positiveInteger)
 convict.addFormat(secret)
 
+const GTM_ID_PATTERN = /^GTM-[A-Z0-9]+$/
+
 export const config = convict({
   serviceVersion: {
     doc: 'The deployed service version for logging and diagnostics',
@@ -35,6 +37,17 @@ export const config = convict({
     nullable: true,
     default: null,
     env: 'SERVICE_VERSION'
+  },
+  gtmId: {
+    doc: 'The Google Tag Manager container id pages report to once analytics cookies are accepted; analytics is off without one',
+    format(value) {
+      if (value !== null && value !== '' && !GTM_ID_PATTERN.test(value)) {
+        throw new Error('must be a Google Tag Manager container id')
+      }
+    },
+    nullable: true,
+    default: null,
+    env: 'GTM_ID'
   },
   environment: {
     doc: 'The current environment',
