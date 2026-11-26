@@ -231,9 +231,8 @@ End-to-end journeys are covered by [lis-journey-tests](https://github.com/DEFRA/
 
 ## Pipelines
 
-Build, versioning and publishing run in GitHub Actions (`.github/workflows`), using the reusable
-workflows in [lis-github-actions](https://github.com/DEFRA/lis-github-actions) and Cake scripts
-(`*.cake`):
+Build, versioning and publishing run in GitHub Actions (`.github/workflows`), using the shared
+composite actions in [lis-github-actions](https://github.com/DEFRA/lis-github-actions):
 
 - **Pull request to `main`**: validate (format, lint, test, container smoke test on port 3102),
   Sonar analysis, version check
