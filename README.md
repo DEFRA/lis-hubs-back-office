@@ -234,13 +234,22 @@ End-to-end journeys are covered by [lis-journey-tests](https://github.com/DEFRA/
 Build, versioning and publishing run in GitHub Actions (`.github/workflows`), using the shared
 composite actions in [lis-github-actions](https://github.com/DEFRA/lis-github-actions):
 
-- **Pull request to `main`**: validate (format, lint, test, container smoke test on port 3102),
-  Sonar analysis, version check
-- **Push to a `feature/` or `hotfix/` branch**: validate, Sonar analysis, prerelease version and tag
-- **Merge to `main`**: validate, Sonar analysis, release tag
-- **Tag push (`*.*.*`)**: publish the container image (`publish.yml`)
+- **Pull request to `main`** (`pull-request.yml`): calculate the version, build, test and
+  smoke-test the container image (on port 3102), and Sonar analysis
+- **Push to a `feature/` or `hotfix/` branch** (`prerelease.yml`): the same, then a prerelease
+  tag if the Sonar quality gate passes
+- **Merge to `main`** (`release.yml`): the same, then a release tag if the Sonar quality gate
+  passes
+- **Version tag pushed** (`publish.yml`): publish the container image built for that tag
 
-Versions come from git tags (SemVer).
+Versions come from git tags (SemVer). When a tag is pushed, `publish.yml` publishes the tested
+image to Amazon ECR, tagged with the version and the commit (`sha-...`), using GitHub OIDC rather
+than long-lived AWS keys. A prerelease version goes to ECR only; a stable version is also pushed to
+Docker Hub as `defradigital/lis-hubs-back-office`.
+
+The publish workflow needs the `LIS_AWS_ACCOUNT_ID` secret. The ECR repository is in `eu-west-2`
+and is named after this repository, and AWS must have a `github-<repository>-build-role` IAM role
+that trusts this repository and can push to it.
 
 ## Branching policy
 
